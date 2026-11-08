@@ -1,0 +1,1626 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Marcos Guerrero · Data Analyst</title>
+<meta name="description" content="Técnico de ensayo eléctrico orientándome al análisis de datos. Proyectos con Python, SQL y Power BI.">
+<!-- Icono de la pestaña: dibujado aquí mismo en SVG, sin archivo aparte -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230b50c4'/%3E%3Cpath d='M6 24 12 16.5 17.5 20 26 8.5' fill='none' stroke='%23ffffff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='26' cy='8.5' r='3' fill='%23ffffff'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: hoja de ensayo sobre retícula técnica.
+   Barra fija arriba, cabecera a dos columnas, rail de etiquetas a la izquierda. */
+:root{
+  --bg:#f4f6f9;
+  --bg0:rgba(244,246,249,0);           /* el mismo fondo, pero transparente */
+  --surface:#ffffff;
+  --fg:#14181e;
+  --muted:#5b646f;
+  --line:#d8dde4;
+  --line-soft:#e7eaef;
+  --accent:#0b50c4;
+  --on-accent:#ffffff;
+  --signal:#b4531a;
+  --grid:rgba(11,80,196,.11);          /* rayado diagonal, teñido de azul */
+  --bar:rgba(244,246,249,.88);         /* fondo translúcido de la barra fija */
+  --veil:rgba(10,14,20,.86);           /* fondo del visor de imágenes */
+  --glow:rgba(11,80,196,.16);          /* resplandor al pasar el ratón */
+  --tinte:rgba(11,80,196,.07);         /* azul diluido para fondos suaves */
+  --hero-1:#0a2a63;                    /* banda de la cabecera */
+  --hero-2:#0e58cf;
+  --hero-fg:#ffffff;
+  --hero-muted:rgba(255,255,255,.74);
+  --hero-accent:#a9c8ff;
+
+  --font-display:'Archivo','Helvetica Neue',Arial,sans-serif;
+  --font-body:'IBM Plex Sans','Segoe UI',system-ui,sans-serif;
+  --font-mono:'IBM Plex Mono','SFMono-Regular',Consolas,monospace;
+
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#11161e;
+    --bg0:rgba(17,22,30,0);
+    --surface:#1a212b;
+    --fg:#e9edf2;
+    --muted:#a3adba;
+    --line:#2d3743;
+    --line-soft:#232b35;
+    --accent:#7aa9ff;
+    --on-accent:#0c0f14;
+    --signal:#e9a06a;
+    --grid:rgba(122,169,255,.11);
+    --bar:rgba(17,22,30,.88);
+    --veil:rgba(2,4,6,.92);
+    --glow:rgba(122,169,255,.2);
+    --tinte:rgba(122,169,255,.085);
+    --hero-1:#061531;
+    --hero-2:#0d336f;
+    --hero-fg:#ffffff;
+    --hero-muted:rgba(255,255,255,.7);
+    --hero-accent:#9ec0ff;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#11161e;
+  --bg0:rgba(17,22,30,0);
+  --surface:#1a212b;
+  --fg:#e9edf2;
+  --muted:#a3adba;
+  --line:#2d3743;
+  --line-soft:#232b35;
+  --accent:#7aa9ff;
+  --on-accent:#0c0f14;
+  --signal:#e9a06a;
+  --grid:rgba(122,169,255,.11);
+  --bar:rgba(17,22,30,.88);
+  --veil:rgba(2,4,6,.92);
+  --glow:rgba(122,169,255,.2);
+  --tinte:rgba(122,169,255,.085);
+  --hero-1:#061531;
+  --hero-2:#0d336f;
+  --hero-fg:#ffffff;
+  --hero-muted:rgba(255,255,255,.7);
+  --hero-accent:#9ec0ff;
+  color-scheme:dark;
+}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:6rem}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+
+body{
+  margin:0;
+  color:var(--fg);
+  font-family:var(--font-body);
+  font-size:17px;
+  line-height:1.62;
+  -webkit-font-smoothing:antialiased;
+  background:var(--bg);
+}
+
+/* Fondo decorativo. Mismo rayado diagonal que la banda de la cabecera,
+   para que toda la página siga el mismo patrón. */
+.fondo{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.fondo::before{
+  content:"";
+  position:absolute;
+  inset:-10%;
+  background-image:repeating-linear-gradient(135deg,
+    var(--grid) 0 1px, transparent 1px 24px);
+}
+/* Las líneas se desplazan despacio a lo largo de su propia diagonal.
+   34 px es justo un periodo (24 px dividido por el seno de 45 grados),
+   así que el salto al reiniciarse no se ve. */
+.js-anim .fondo::before{animation:deriva 55s linear infinite}
+@keyframes deriva{
+  from{transform:translate3d(0,0,0)}
+  to{transform:translate3d(33.94px,-33.94px,0)}
+}
+/* Óvalo del color del fondo que calma la zona de lectura, sin bordes duros */
+.fondo::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:radial-gradient(74rem 92% at 50% 42%, var(--bg) 0%, var(--bg) 34%, var(--bg0) 82%);
+}
+
+/* Capa del contenido, por encima del fondo. Sin ancho máximo: así la banda
+   de la cabecera llega de borde a borde y no parece un bloque pegado. */
+.hoja{position:relative;z-index:1}
+body::before{
+  content:"";
+  position:fixed;
+  inset:0 0 auto;
+  height:env(safe-area-inset-top,0px);
+  z-index:31;
+  background:var(--bar);
+  -webkit-backdrop-filter:blur(10px);
+  backdrop-filter:blur(10px);
+}
+img{max-width:100%;height:auto;display:block}
+a{color:var(--accent)}
+
+/* Cada bloque de contenido se centra aquí dentro */
+.wrap{
+  max-width:76rem;
+  margin:0 auto;
+  padding-left:max(24px,env(safe-area-inset-left,0px));
+  padding-right:max(24px,env(safe-area-inset-right,0px));
+}
+
+/* ---------- Barra fija ---------- */
+.topbar{
+  position:sticky;
+  top:env(safe-area-inset-top,0px);
+  z-index:30;
+  background:var(--bar);
+  -webkit-backdrop-filter:blur(10px);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);
+}
+.topbar__inner{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:.6rem 1.75rem;
+  padding-block:1rem;
+}
+.brand{display:flex;align-items:baseline;gap:.7rem;margin-right:auto;text-decoration:none;color:var(--fg);min-width:0}
+.brand b{font-family:var(--font-display);font-weight:700;font-size:1.3rem;letter-spacing:-.02em}
+.brand span{
+  font-family:var(--font-mono);
+  font-size:.78rem;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--accent);
+  white-space:nowrap;
+}
+.nav{display:flex;gap:.2rem;flex-wrap:wrap}
+.nav a{
+  font-size:1rem;
+  text-decoration:none;
+  color:var(--muted);
+  padding:.4rem .7rem;
+  border-radius:3px;
+  white-space:nowrap;
+}
+.nav a:hover{color:var(--fg)}
+.nav a[aria-current="true"]{color:var(--fg);background:var(--line-soft)}
+.topbar .btn{padding:.5rem 1rem}
+@media (max-width:680px){.topbar .btn{display:none}}
+
+/* ---------- Cabecera ----------
+   Sin banda: el color vive en bloques concretos, no de fondo. */
+.hero{padding-block:clamp(3rem,7vw,5rem) clamp(2.5rem,6vw,4rem)}
+.hero__cols{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(0,.92fr);gap:3.5rem;align-items:center}
+@media (max-width:980px){.hero__cols{grid-template-columns:minmax(0,1fr);gap:2.5rem}}
+
+.foto{
+  width:104px;
+  height:104px;
+  border-radius:50%;
+  object-fit:cover;
+  border:2px solid var(--accent);
+  margin-bottom:1.5rem;
+}
+.eyebrow{
+  font-family:var(--font-mono);
+  font-size:.82rem;
+  letter-spacing:.15em;
+  text-transform:uppercase;
+  color:var(--accent);
+  margin:0 0 1.1rem;
+}
+h1{
+  font-family:var(--font-display);
+  font-weight:700;
+  font-size:clamp(2.9rem,7.5vw,5rem);
+  line-height:1;
+  letter-spacing:-.032em;
+  margin:0;
+  text-wrap:balance;
+}
+.role{
+  font-family:var(--font-display);
+  font-weight:500;
+  font-size:clamp(1.15rem,2.6vw,1.5rem);
+  color:var(--muted);
+  margin:.9rem 0 0;
+  max-width:40ch;
+}
+/* Línea de consola que se escribe sola */
+.typeline{
+  font-family:var(--font-mono);
+  font-size:.92rem;
+  color:var(--muted);
+  margin:1rem 0 0;
+  min-height:1.5em;
+}
+.typeline .prompt{color:var(--accent)}
+.caret{
+  display:inline-block;
+  width:.55em;
+  height:1.05em;
+  margin-left:.12em;
+  background:var(--accent);
+  vertical-align:-.18em;
+}
+.js-anim .caret{animation:parpadeo 1.05s steps(1) infinite}
+@keyframes parpadeo{0%,49%{opacity:1}50%,100%{opacity:0}}
+.lead{margin:1.6rem 0 0;max-width:56ch;font-size:1.125rem}
+
+.actions{display:flex;flex-wrap:wrap;gap:.65rem;margin-top:2rem}
+.btn{
+  display:inline-block;
+  font-family:var(--font-mono);
+  font-size:.875rem;
+  letter-spacing:.04em;
+  text-decoration:none;
+  padding:.65rem 1.15rem;
+  border:1px solid var(--line);
+  border-radius:3px;
+  color:var(--fg);
+  background:var(--surface);
+  transition:border-color .15s,color .15s;
+}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn--solid{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.btn--solid:hover{color:var(--on-accent);opacity:.88}
+a:focus-visible,.btn:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+/* ---------- Bloques de color ----------
+   El azul no va de fondo: va en cajas que marcan lo que importa. */
+.bloque-azul{
+  background:linear-gradient(145deg, var(--hero-1), var(--hero-2));
+  color:#fff;
+  border-radius:4px;
+}
+.bloque-azul .org{color:rgba(255,255,255,.72)}
+
+/* ---------- Panel de resultados de la cabecera ---------- */
+/* Primer bloque de color: el resumen del último análisis */
+.panel{
+  border:1px solid transparent;
+  border-radius:4px;
+  background:linear-gradient(145deg, var(--hero-1), var(--hero-2));
+  color:#fff;
+  overflow:hidden;
+}
+.panel:hover{box-shadow:0 0 0 1px var(--accent), 0 16px 40px var(--glow)}
+.panel__head{
+  display:flex;
+  align-items:center;
+  gap:.55rem;
+  padding:.7rem 1.1rem;
+  border-bottom:1px solid rgba(255,255,255,.16);
+  font-family:var(--font-mono);
+  font-size:.7rem;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--hero-muted);
+}
+.dot{width:7px;height:7px;border-radius:50%;background:#ffc078;flex:none}
+.panel__body{padding:1.25rem 1.3rem 1.4rem}
+.metric{margin-bottom:1.3rem}
+.metric:last-of-type{margin-bottom:0}
+.metric__top{display:flex;align-items:baseline;justify-content:space-between;gap:1rem;margin-bottom:.45rem}
+.metric__num{
+  font-family:var(--font-display);
+  font-weight:700;
+  font-size:clamp(1.9rem,4.5vw,2.5rem);
+  line-height:1;
+  letter-spacing:-.02em;
+  font-variant-numeric:tabular-nums;
+}
+.metric__num small{font-size:.5em;font-weight:500;color:var(--hero-muted);margin-left:.15em}
+.metric__pct{font-family:var(--font-mono);font-size:.8rem;color:#ffc078;font-variant-numeric:tabular-nums}
+.metric__lbl{font-size:.9rem;color:var(--hero-muted);margin:.45rem 0 0}
+.track{height:5px;background:rgba(255,255,255,.14);overflow:hidden}
+.track__fill{height:100%;background:#fff;width:var(--w)}
+.panel__foot{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:1px;
+  background:rgba(255,255,255,.16);
+  border-top:1px solid rgba(255,255,255,.16);
+}
+.panel__foot div{background:rgba(255,255,255,.03);padding:.85rem 1.1rem;min-width:0}
+.panel__foot dt{font-family:var(--font-mono);font-size:.65rem;letter-spacing:.13em;text-transform:uppercase;color:var(--hero-muted);margin-bottom:.25rem}
+.panel__foot dd{margin:0;font-family:var(--font-display);font-weight:600;font-size:1.15rem;font-variant-numeric:tabular-nums}
+
+/* Datos de un vistazo, al principio del perfil. Sin caja: una barra de
+   acento a la izquierda basta para agrupar cada uno. */
+.readings{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(12rem,1fr));
+  gap:1.4rem 2rem;
+  margin:0 0 2.5rem;
+}
+.reading{min-width:0;padding-left:1rem;border-left:2px solid var(--accent)}
+.reading dt{font-family:var(--font-mono);font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0 0 .35rem}
+.reading dd{margin:0;font-family:var(--font-display);font-weight:600;font-size:1.1rem;font-variant-numeric:tabular-nums}
+
+/* ---------- Secciones con rail ---------- */
+section{padding-block:clamp(3.5rem,7vw,6rem)}
+.grid{display:grid;grid-template-columns:10rem minmax(0,1fr);gap:3rem}
+@media (max-width:820px){.grid{grid-template-columns:minmax(0,1fr);gap:1.5rem}}
+/* En vez de una línea que cruza toda la página, cada sección se marca
+   con una barra corta del color de acento sobre su etiqueta. */
+.rail{
+  font-family:var(--font-mono);
+  font-size:.8rem;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:var(--accent);
+  padding-top:.5rem;
+}
+.rail::before{
+  content:"";
+  display:block;
+  width:2.6rem;
+  height:3px;
+  background:var(--accent);
+  margin-bottom:1rem;
+}
+/* Todos los títulos de sección, del mismo tamaño */
+h2{
+  font-family:var(--font-display);
+  font-weight:600;
+  font-size:clamp(1.85rem,4vw,2.45rem);
+  letter-spacing:-.022em;
+  margin:0 0 1.2rem;
+  text-wrap:balance;
+}
+p{margin:0 0 1rem;max-width:64ch}
+p:last-child{margin-bottom:0}
+
+/* ---------- Perfil ---------- */
+.about{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:2.5rem}
+@media (max-width:900px){.about{grid-template-columns:minmax(0,1fr);gap:1.75rem}}
+.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.8rem}
+@media (max-width:440px){.cards{grid-template-columns:minmax(0,1fr)}}
+.card{
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:4px;
+  padding:1.25rem 1.3rem;
+  min-width:0;
+}
+/* Icono dentro de un círculo azul diluido */
+.card__icono{
+  width:42px;
+  height:42px;
+  display:grid;
+  place-items:center;
+  border-radius:50%;
+  background:var(--tinte);
+  margin-bottom:.9rem;
+}
+.card svg{width:22px;height:22px;stroke:var(--accent);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.card h3{font-family:var(--font-display);font-weight:600;font-size:1rem;margin:0 0 .3rem}
+.card p{margin:0;font-size:.92rem;color:var(--muted);line-height:1.5}
+
+/* ---------- Proyecto ---------- */
+.project{border:1px solid var(--line);border-radius:4px;background:var(--surface);overflow:hidden}
+.project__body{padding:clamp(1.5rem,3.5vw,2.4rem)}
+.project__head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:.75rem;margin-bottom:1.25rem}
+.project__head h3{font-family:var(--font-display);font-weight:600;font-size:clamp(1.3rem,3vw,1.65rem);letter-spacing:-.015em;margin:0}
+.stamp{font-family:var(--font-mono);font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);white-space:nowrap}
+.stamp--wip{color:var(--signal)}
+/* Segundo bloque de color: el hallazgo del proyecto */
+.finding{
+  font-family:var(--font-display);
+  font-weight:500;
+  font-size:clamp(1.25rem,3vw,1.65rem);
+  line-height:1.35;
+  letter-spacing:-.01em;
+  margin:0 0 1.75rem;
+  padding:1.5rem 1.7rem;
+  max-width:none;
+  text-wrap:balance;
+}
+.fig{font-family:var(--font-mono);font-weight:500;font-variant-numeric:tabular-nums;color:#ffc078}
+.questions{list-style:none;margin:0 0 1.5rem;padding:0;border-top:1px solid var(--line-soft)}
+.questions li{display:grid;grid-template-columns:minmax(0,15rem) minmax(0,1fr);gap:.25rem 1.5rem;padding:.75rem 0;border-bottom:1px solid var(--line-soft)}
+@media (max-width:660px){.questions li{grid-template-columns:1fr}}
+.questions b{font-weight:600}
+.questions span{color:var(--muted)}
+.tags{display:flex;flex-wrap:wrap;gap:.4rem;margin:0 0 1.5rem;padding:0;list-style:none}
+.tags li{font-family:var(--font-mono);font-size:.8rem;color:var(--muted);border:1px solid var(--line);border-radius:3px;padding:.22rem .6rem}
+/* ---------- Panel interactivo del proyecto ----------
+   Va separado de la ficha: es otra cosa, no el pie de la anterior. */
+.panelint{
+  margin-top:1.1rem;
+  border:1px solid var(--line);
+  border-radius:4px;
+  background:var(--surface);
+  overflow:hidden;
+}
+.panelint__head{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  justify-content:space-between;
+  gap:.6rem 1rem;
+  padding:1rem 1.3rem;
+  background:linear-gradient(145deg, var(--hero-1), var(--hero-2));
+}
+.panelint__head b{display:flex;align-items:center;gap:.6rem;font-family:var(--font-mono);font-size:.74rem;letter-spacing:.14em;text-transform:uppercase;color:#fff;font-weight:500}
+.panelint__head span{font-family:var(--font-mono);font-size:.7rem;color:rgba(255,255,255,.7)}
+/* Punto que late: avisa de que esto se toca */
+.pulso{width:8px;height:8px;border-radius:50%;background:#ffc078;flex:none}
+.js-anim .pulso{animation:latido 2s ease-in-out infinite}
+@keyframes latido{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.45;transform:scale(.72)}}
+.panelint__cuerpo{padding:1.4rem}
+
+.herram{padding-bottom:1.75rem;margin-bottom:1.75rem;border-bottom:1px solid var(--line-soft)}
+.herram:last-child{padding-bottom:0;margin-bottom:0;border-bottom:0}
+.herram h4{font-family:var(--font-display);font-weight:600;font-size:1.2rem;margin:0 0 .3rem}
+.herram .pie{font-size:.92rem;color:var(--muted);margin:0 0 1.2rem;max-width:62ch}
+
+.mandos{display:flex;flex-wrap:wrap;gap:1rem 1.6rem;align-items:flex-end}
+
+/* El duelo: la empresa elegida contra el índice */
+.duelo{display:grid;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr));gap:.9rem;margin-top:1.4rem}
+.lado{border:1px solid var(--line);border-radius:4px;background:var(--bg);padding:1.1rem 1.25rem;min-width:0}
+.lado__quien{font-family:var(--font-mono);font-size:.68rem;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);margin:0 0 .5rem}
+.lado__cifra{font-family:var(--font-display);font-weight:700;font-size:clamp(1.7rem,4.5vw,2.4rem);line-height:1;letter-spacing:-.02em;font-variant-numeric:tabular-nums;margin:0}
+.lado__pie{font-size:.85rem;color:var(--muted);margin:.75rem 0 0;max-width:none}
+.pista{height:7px;border-radius:999px;background:var(--line-soft);overflow:hidden;margin-top:.85rem}
+.pista i{display:block;height:100%;background:var(--accent);transition:width .5s cubic-bezier(.33,0,.2,1)}
+.pista--gris{background:var(--muted)}
+
+.veredicto{margin:1.3rem 0 0;padding:1.1rem 1.3rem;font-family:var(--font-display);font-size:1.1rem;font-weight:500;max-width:none}
+.veredicto strong{font-weight:700;font-size:1.45em;font-variant-numeric:tabular-nums}
+.veredicto .bien{color:#9ff0c4}
+.veredicto .mal{color:#ffc078}
+.marcador{font-family:var(--font-mono);font-size:.82rem;color:var(--muted);margin:.9rem 0 0;max-width:none}
+
+.campo--ancho input[type=range]{width:min(26rem,100%)}
+.escala{display:flex;justify-content:space-between;width:min(26rem,100%);font-family:var(--font-mono);font-size:.72rem;color:var(--muted)}
+
+.filtros{display:flex;flex-wrap:wrap;gap:1rem 1.6rem;align-items:flex-end;margin-bottom:1.4rem}
+.campo{display:flex;flex-direction:column;gap:.4rem;min-width:0}
+.campo label{font-family:var(--font-mono);font-size:.66rem;letter-spacing:.13em;text-transform:uppercase;color:var(--muted)}
+.campo select{
+  font:inherit;
+  font-size:.92rem;
+  padding:.5rem .7rem;
+  border:1px solid var(--line);
+  border-radius:3px;
+  background:var(--surface);
+  color:var(--fg);
+  min-width:14rem;
+}
+.campo input[type=range]{width:13rem;accent-color:var(--accent)}
+.campo .valor{font-family:var(--font-mono);font-size:.78rem;color:var(--accent)}
+
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(8.5rem,1fr));gap:.8rem;margin:0 0 1.4rem}
+.kpi{border:1px solid var(--line);border-radius:4px;background:var(--bg);padding:.85rem 1rem;min-width:0}
+.kpi dt{font-family:var(--font-mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:.35rem}
+.kpi dd{margin:0;font-family:var(--font-display);font-weight:700;font-size:1.45rem;font-variant-numeric:tabular-nums}
+
+.graficos{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:.9rem;margin-bottom:.9rem}
+@media (max-width:860px){.graficos{grid-template-columns:minmax(0,1fr)}}
+.gr{border:1px solid var(--line);border-radius:4px;background:var(--bg);padding:1rem 1.1rem 1.1rem;min-width:0}
+.gr h4{font-family:var(--font-display);font-weight:600;font-size:.98rem;margin:0 0 .2rem}
+.gr .pie{font-size:.8rem;color:var(--muted);margin:0 0 .9rem;max-width:none}
+.gr svg{width:100%;height:auto;display:block}
+
+/* Piezas de los gráficos */
+.rejilla{stroke:var(--line-soft);stroke-width:1}
+.eje{stroke:var(--line);stroke-width:1}
+.etq{fill:var(--muted);font-family:var(--font-mono);font-size:10px}
+.etq--fin{text-anchor:end}
+.etq--med{text-anchor:middle}
+.punto{fill:var(--muted);opacity:.45}
+.punto--gana{fill:var(--accent);opacity:.9}
+.ref{stroke:var(--signal);stroke-width:1.2;stroke-dasharray:5 4}
+.ref-etq{fill:var(--signal);font-family:var(--font-mono);font-size:10px}
+.barra{fill:var(--accent)}
+.barra--flojo{fill:var(--muted);opacity:.4}
+.barra-etq{fill:var(--fg);font-family:var(--font-mono);font-size:10px}
+.serie-indice{stroke:var(--muted);stroke-width:2;fill:none}
+.serie-media{stroke:var(--accent);stroke-width:2;fill:none}
+.leyenda{font-family:var(--font-mono);font-size:10px;fill:var(--muted)}
+.sin-datos{fill:var(--muted);font-family:var(--font-body);font-size:13px;text-anchor:middle}
+
+.shot{border-top:1px solid var(--line)}
+.shot a{display:block}
+.shot img{width:100%}
+
+.gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(11rem,1fr));gap:1px;background:var(--line);border-top:1px solid var(--line)}
+.gallery figure{margin:0;background:var(--surface);min-width:0}
+.gallery a{display:block;border-bottom:1px solid var(--line-soft)}
+.gallery a:hover img,.shot a:hover img{opacity:.85}
+.gallery img,.shot img{transition:opacity .15s}
+.gallery figcaption{padding:.65rem .85rem .8rem;font-size:.85rem;line-height:1.4;color:var(--muted)}
+.gallery figcaption b{display:block;font-family:var(--font-mono);font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:500;margin-bottom:.2rem}
+
+.tabs{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1.5rem}
+.tab{
+  font-family:var(--font-mono);
+  font-size:.875rem;
+  letter-spacing:.04em;
+  padding:.6rem 1.1rem;
+  border:1px solid var(--line);
+  border-radius:3px;
+  background:var(--surface);
+  color:var(--muted);
+  cursor:pointer;
+  transition:border-color .15s,color .15s;
+}
+.tab:hover{border-color:var(--accent);color:var(--accent)}
+.tab[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+
+/* ---------- Realce al pasar el ratón ----------
+   Borde iluminado, resplandor del color de acento y un leve levantamiento.
+   El levantamiento solo si el visitante no ha pedido menos movimiento. */
+.project,.panel,.card{
+  transition:border-color .22s ease,box-shadow .22s ease,transform .22s ease;
+}
+.project:hover,.panel:hover,.card:hover{
+  border-color:var(--accent);
+  box-shadow:0 0 0 1px var(--accent), 0 12px 32px var(--glow);
+}
+@media (prefers-reduced-motion:no-preference){
+  .project:hover,.panel:hover,.card:hover{transform:translateY(-3px)}
+}
+.gallery figure{transition:box-shadow .2s ease}
+.gallery figure:hover{box-shadow:inset 0 0 0 1px var(--accent)}
+
+/* ---------- Experiencia y formación ----------
+   Cada etapa es una tarjeta colgada de una línea de tiempo vertical.
+   Así se ve dónde empieza y acaba cada bloque sin usar rayas. */
+.timeline{position:relative;display:grid;gap:2.4rem;padding-left:1.9rem}
+.timeline::before{
+  content:"";
+  position:absolute;
+  left:5px;
+  top:.5rem;
+  bottom:.5rem;
+  width:2px;
+  background:linear-gradient(var(--hilo), transparent);
+}
+.entry{position:relative}
+/* El punto de la línea de tiempo, alineado con la fecha */
+.entry::before{
+  content:"";
+  position:absolute;
+  left:calc(-1.9rem + 1px);
+  top:.3rem;
+  width:11px;
+  height:11px;
+  border-radius:50%;
+  background:var(--bg);
+  border:2px solid var(--hilo);
+}
+/* La fecha, en monoespaciada y del color de la rama */
+.entry time{
+  display:block;
+  font-family:var(--font-mono);
+  font-size:.82rem;
+  letter-spacing:.06em;
+  color:var(--hilo);
+  font-variant-numeric:tabular-nums;
+  margin-bottom:.4rem;
+}
+.entry h3{font-family:var(--font-display);font-weight:600;font-size:1.2rem;margin:0 0 .2rem}
+.entry .org{color:var(--muted);font-size:.95rem;margin:0 0 .7rem}
+.entry p{font-size:.98rem;margin:0 0 .6rem;color:var(--muted)}
+.entry p:last-child{margin-bottom:0}
+.entry ul{margin:0;padding-left:1.15rem;font-size:.98rem;color:var(--muted)}
+.entry li{margin-bottom:.45rem}
+.entry li:last-child{margin-bottom:0}
+/* Azul para la experiencia, naranja para la formación */
+.timeline{--hilo:var(--accent)}
+.timeline--estudios{--hilo:var(--signal)}
+/* La estancia internacional: destaca con un tinte azul y una barra de acento,
+   no con un bloque macizo, para no romper el ritmo de la lista. */
+.highlight{
+  margin-top:1.3rem;
+  padding:1.2rem 1.4rem;
+  border-left:3px solid var(--accent);
+  border-radius:0 4px 4px 0;
+  background:var(--tinte);
+}
+.highlight h4{font-family:var(--font-display);font-weight:600;font-size:1.1rem;margin:0 0 .2rem}
+.highlight .org{margin-bottom:.65rem}
+.insignia{
+  display:inline-block;
+  font-family:var(--font-mono);
+  font-size:.66rem;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  padding:.28rem .7rem;
+  border-radius:999px;
+  background:var(--accent);
+  color:var(--on-accent);
+  margin-bottom:.7rem;
+}
+
+/* ---------- Herramientas ---------- */
+.tools{
+  list-style:none;
+  margin:0;
+  padding:0;
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(17rem,1fr));
+  gap:.8rem;
+}
+.tools li{min-width:0}
+.tools b{display:block;font-family:var(--font-display);font-weight:600;font-size:1.1rem;margin-bottom:.4rem}
+/* Cuadradito de acento delante del nombre, en vez de un borde alrededor */
+.tools b::before{
+  content:"";
+  display:inline-block;
+  width:.5rem;
+  height:.5rem;
+  background:var(--accent);
+  margin-right:.6rem;
+  vertical-align:.1em;
+}
+.tools span{color:var(--muted);font-size:.96rem;line-height:1.55}
+
+/* ---------- Idiomas ---------- */
+.langs{display:flex;flex-wrap:wrap;gap:1.4rem 3.5rem;margin:0}
+.langs>div{min-width:0}
+.langs dt{font-family:var(--font-display);font-weight:600;font-size:1.15rem;margin:0 0 .25rem}
+.langs dd{margin:0;font-family:var(--font-mono);font-size:.78rem;letter-spacing:.09em;color:var(--signal);text-transform:uppercase}
+
+/* ---------- Contacto ---------- */
+/* Cierre de la página: mismo esquema que el resto de secciones,
+   pero con los botones centrados dentro de su columna.
+   Ojo: aquí no se puede usar ".cierre p" a secas, porque la etiqueta
+   del rail también es un párrafo y le ganaría a su propia regla. */
+.cierre .actions{justify-content:center;margin-top:2.25rem}
+.btn--grande{display:inline-flex;align-items:center;gap:.6rem;font-size:.95rem;padding:.9rem 1.6rem}
+.btn--grande svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+/* Los secundarios quedan debajo, en texto, sin competir con los botones */
+.enlaces{display:flex;flex-wrap:wrap;justify-content:center;gap:1rem 2.25rem;margin:1.6rem 0 0;font-family:var(--font-mono);font-size:.85rem}
+.enlaces a{text-decoration:none;color:var(--muted);border-bottom:1px solid transparent;padding-bottom:3px}
+.enlaces a:hover{color:var(--accent);border-bottom-color:var(--accent)}
+
+footer{
+  border-top:1px solid var(--line);
+  padding-block:2.2rem 3.2rem;
+  font-family:var(--font-mono);
+  font-size:.8rem;
+  color:var(--muted);
+  display:flex;
+  flex-wrap:wrap;
+  gap:.5rem 1.5rem;
+  justify-content:space-between;
+}
+
+/* ---------- Visor de imágenes ----------
+   El display:flex de abajo gana sobre el atributo hidden del navegador,
+   así que hay que anularlo a mano o el visor taparía la página entera. */
+.lightbox[hidden]{display:none}
+.lightbox{
+  position:fixed;
+  inset:0;
+  z-index:40;
+  background:var(--veil);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:max(1.5rem,env(safe-area-inset-top,0px)) max(1.5rem,env(safe-area-inset-right,0px)) max(1.5rem,env(safe-area-inset-bottom,0px)) max(1.5rem,env(safe-area-inset-left,0px));
+}
+.lightbox img{max-width:100%;max-height:100%;width:auto;border:1px solid rgba(255,255,255,.14)}
+/* Vista de documento: el PDF dentro de la web, con su botón de descarga */
+.visor__doc{display:flex;flex-direction:column;gap:.9rem;width:min(60rem,100%);height:100%}
+.visor__doc iframe{flex:1;width:100%;border:1px solid rgba(255,255,255,.16);border-radius:4px;background:#fff;min-height:0}
+.visor__doc .btn{align-self:center}
+.lightbox__close{
+  position:absolute;
+  top:max(1rem,env(safe-area-inset-top,0px));
+  right:max(1rem,env(safe-area-inset-right,0px));
+  width:44px;
+  height:44px;
+  display:grid;
+  place-items:center;
+  background:rgba(255,255,255,.1);
+  border:1px solid rgba(255,255,255,.2);
+  border-radius:3px;
+  cursor:pointer;
+  color:#fff;
+}
+.lightbox__close:hover{background:rgba(255,255,255,.2)}
+.lightbox__close svg{width:20px;height:20px;stroke:currentColor;stroke-width:1.8;fill:none;stroke-linecap:round}
+
+/* ---------- Aparición al hacer scroll ----------
+   La clase js-anim solo la añade el script. Sin JavaScript, o con
+   "reducir movimiento" activado, todo se ve desde el principio. */
+.js-anim [data-anim]{opacity:0;transform:translateY(12px)}
+.js-anim [data-anim].visible{opacity:1;transform:none;transition:opacity .5s ease,transform .5s ease}
+.js-anim .track__fill{width:0}
+.js-anim .track__fill.grown{width:var(--w);transition:width 1.2s cubic-bezier(.33,0,.2,1)}
+</style>
+</head>
+<body>
+
+<div class="fondo" aria-hidden="true"></div>
+
+<div class="hoja">
+
+<!-- ============ BARRA FIJA ============ -->
+<div class="topbar">
+  <div class="wrap topbar__inner">
+    <a class="brand" href="#inicio">
+      <b>Marcos Guerrero</b>
+      <span>Data Analyst</span>
+    </a>
+    <nav class="nav" aria-label="Secciones">
+      <a href="#perfil">Sobre mí</a>
+      <a href="#proyectos">Proyectos</a>
+      <a href="#experiencia">Experiencia</a>
+      <a href="#formacion">Formación</a>
+      <a href="#contacto">Contacto</a>
+    </nav>
+    <a class="btn" href="CV-Marcos-Guerrero-Sanchez.pdf" data-visor>Ver el CV</a>
+  </div>
+</div>
+
+  <!-- ============ CABECERA ============ -->
+  <header class="hero" id="inicio">
+   <div class="wrap">
+    <div class="hero__cols">
+      <div>
+        <img class="foto" src="https://github.com/Marcosguerrero19.png?size=320"
+             alt="Marcos Guerrero Sánchez" width="104" height="104">
+        <p class="eyebrow">Valencia, España</p>
+        <h1>Marcos Guerrero</h1>
+        <p class="role">Data Analyst · Técnico de ensayo eléctrico</p>
+        <p class="typeline">
+          <span class="prompt">&gt;</span>
+          <span data-type data-palabras="Python,pandas,SQL,Power BI,DAX,Git">Python · pandas · SQL · Power BI · DAX · Git</span><span class="caret"></span>
+        </p>
+        <p class="lead">
+          Llevo más de cinco años ensayando y poniendo en marcha equipos de potencia:
+          medir, registrar cada parámetro y decidir si un resultado se sostiene o es un
+          fallo de medida. Ahora aplico lo mismo a conjuntos de datos más grandes.
+        </p>
+
+        <div class="actions">
+          <a class="btn btn--solid" href="#proyectos">Ver proyectos</a>
+          <a class="btn" href="CV-Marcos-Guerrero-Sanchez.pdf" data-visor>Ver el CV</a>
+          <a class="btn" href="https://www.linkedin.com/in/marcos-guerrero-sanchez" target="_blank" rel="noopener">LinkedIn</a>
+          <a class="btn" href="https://github.com/Marcosguerrero19" target="_blank" rel="noopener">GitHub</a>
+        </div>
+      </div>
+
+      <!-- Panel con los resultados reales del último proyecto -->
+      <div class="panel">
+        <div class="panel__head"><span class="dot"></span> Último análisis · S&amp;P 500</div>
+        <div class="panel__body">
+          <div class="metric">
+            <div class="metric__top">
+              <span class="metric__num" data-cuenta="149">149<small>/461</small></span>
+              <span class="metric__pct">32,3 %</span>
+            </div>
+            <div class="track"><div class="track__fill" style="--w:32.3%"></div></div>
+            <p class="metric__lbl">Empresas que superaron al índice en diez años</p>
+          </div>
+          <div class="metric">
+            <div class="metric__top">
+              <span class="metric__num" data-cuenta="461">461<small>/461</small></span>
+              <span class="metric__pct">100 %</span>
+            </div>
+            <div class="track"><div class="track__fill" style="--w:100%"></div></div>
+            <p class="metric__lbl">Empresas con más riesgo que el índice. Ninguna se movió menos que él.</p>
+          </div>
+        </div>
+        <dl class="panel__foot">
+          <div><dt>Índice</dt><dd>15,2 % anual</dd></div>
+          <div><dt>Empresa típica</dt><dd>12,1 % anual</dd></div>
+        </dl>
+      </div>
+    </div>
+   </div>
+  </header>
+
+<div class="wrap">
+
+  <!-- ============ PERFIL ============ -->
+  <section id="perfil">
+    <div class="grid" data-anim>
+      <p class="rail">Perfil</p>
+      <div>
+        <h2>Llevo años trabajando con datos, solo que con otras herramientas</h2>
+
+        <dl class="readings">
+          <div class="reading"><dt>Experiencia</dt><dd>+5 años en ensayo</dd></div>
+          <div class="reading"><dt>Potencia ensayada</dt><dd>Inversores de hasta 4,4 MW</dd></div>
+          <div class="reading"><dt>Internacional</dt><dd>11 meses en EE. UU.</dd></div>
+          <div class="reading"><dt>Datos</dt><dd>Python · SQL · Power BI</dd></div>
+        </dl>
+
+        <div class="about">
+          <div>
+            <p>
+              En Power Electronics ensayo inversores solares centrales de hasta 4,4 MW.
+              Buena parte de mi trabajo consiste en registrar de forma estructurada los
+              tiempos y los parámetros de cada ensayo, y en diagnosticar incidencias a
+              partir de los datos de monitorización del proceso para identificar los
+              fallos que se repiten. Es decir: generar un conjunto de datos fiable y
+              sacar conclusiones de él.
+            </p>
+            <p>
+              Lo que hago ahora es aprender a hacer eso mismo a otra escala y con las
+              herramientas adecuadas. Curso un Máster en Data Analytics y construyo
+              proyectos propios de principio a fin, con el código publicado y
+              documentado, incluidas las limitaciones de cada análisis.
+            </p>
+          </div>
+
+          <div class="cards">
+            <div class="card">
+              <span class="card__icono"><svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M3.5 17a9 9 0 1 1 17 0"/><path d="M12 17 16.5 10"/><circle cx="12" cy="17" r="1.4"/>
+              </svg></span>
+              <h3>Desconfiar del dato</h3>
+              <p>Antes de dar un resultado por bueno, compruebo si la medida es real o es un fallo del equipo.</p>
+            </div>
+            <div class="card">
+              <span class="card__icono"><svg viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="4" y="3" width="16" height="18" rx="1.5"/><path d="M8 8h8M8 12h8M8 16h5"/>
+              </svg></span>
+              <h3>Dejar trazabilidad</h3>
+              <p>Cada ensayo queda registrado con sus parámetros, de forma que otro pueda repetirlo y llegar a lo mismo.</p>
+            </div>
+            <div class="card">
+              <span class="card__icono"><svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M4 20V4M4 20h16"/><path d="M7 15l4-5 3 3 5-7"/>
+              </svg></span>
+              <h3>Buscar el patrón</h3>
+              <p>De los datos de monitorización a los fallos que se repiten: lo puntual se arregla, lo recurrente se analiza.</p>
+            </div>
+            <div class="card">
+              <span class="card__icono"><svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M4 5h16v11H13l-4 3v-3H4z"/><path d="M8 9h8M8 12h5"/>
+              </svg></span>
+              <h3>Explicarlo</h3>
+              <p>Presentar el resultado a quien no estaba delante cuando se tomó la medida, sin que pierda el matiz.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PROYECTOS ============ -->
+  <section id="proyectos">
+    <div class="grid" data-anim>
+      <p class="rail">Proyectos</p>
+      <div>
+        <h2>Proyectos</h2>
+
+        <div class="tabs" data-tabs role="tablist" aria-label="Proyectos" hidden>
+          <button class="tab" type="button" role="tab" id="tab-sp500"
+                  aria-controls="panel-sp500" aria-selected="true">S&amp;P 500</button>
+          <button class="tab" type="button" role="tab" id="tab-vivienda"
+                  aria-controls="panel-vivienda" aria-selected="false">Vivienda</button>
+          <button class="tab" type="button" role="tab" id="tab-solar"
+                  aria-controls="panel-solar" aria-selected="false">Autoconsumo solar</button>
+        </div>
+
+        <!-- Proyecto 1 -->
+        <div id="panel-sp500" role="tabpanel" aria-labelledby="tab-sp500">
+          <article class="project">
+            <div class="project__body">
+              <div class="project__head">
+                <h3>¿Merece la pena elegir acciones del S&amp;P 500?</h3>
+                <span class="stamp">2026 · Python · SQL · Power BI</span>
+              </div>
+
+              <p class="finding bloque-azul">
+                Solo <span class="fig">149</span> de las <span class="fig">461</span>
+                empresas del índice lo superaron en diez años. Y
+                <span class="fig">ninguna</span> tuvo menos riesgo que él.
+              </p>
+
+              <ul class="questions">
+                <li><b>¿Qué comprar?</b><span>El índice. Solo el 32,3 % de las empresas lo supera.</span></li>
+                <li><b>¿Cuándo entrar?</b><span>Casi da igual: de una vez gana en el 86,4 % de los meses.</span></li>
+                <li><b>¿Cuánto tiempo quedarse?</b><span>Lo cambia todo: del 82,2 % de periodos ganadores a un año al 100 % a veinte.</span></li>
+              </ul>
+
+              <p>
+                Diez años de cotizaciones de 461 empresas descargadas y limpiadas con reglas
+                automáticas, métricas de rentabilidad, volatilidad y caída máxima calculadas
+                con pandas, consultas de comprobación en MySQL y un informe de cinco páginas
+                en Power BI con medidas DAX, parámetros ajustables y tooltips de detalle.
+              </p>
+
+              <ul class="tags">
+                <li>pandas</li><li>yfinance</li><li>MySQL</li><li>DAX</li><li>Power BI</li><li>Git</li>
+              </ul>
+
+              <div class="actions">
+                <a class="btn btn--solid" href="https://github.com/Marcosguerrero19/Analisis-SP500" target="_blank" rel="noopener">Ver el repositorio</a>
+              </div>
+            </div>
+
+            <div class="shot">
+              <a href="01-resumen.png" data-visor>
+                <img src="01-resumen.png"
+                     alt="Página de resumen del informe: el índice frente a la media de sus empresas"
+                     width="1968" height="1128" loading="lazy">
+              </a>
+            </div>
+
+            <div class="gallery">
+              <figure>
+                <a href="02-empresas.png" data-visor>
+                  <img src="02-empresas.png" alt="Página de empresas: distribución de rentabilidad y riesgo de las 461 empresas"
+                       width="1968" height="1128" loading="lazy">
+                </a>
+                <figcaption><b>Empresas</b>Rentabilidad y riesgo de las 461.</figcaption>
+              </figure>
+              <figure>
+                <a href="03-sectores.png" data-visor>
+                  <img src="03-sectores.png" alt="Página de sectores: qué sectores superan al índice"
+                       width="1968" height="1128" loading="lazy">
+                </a>
+                <figcaption><b>Sectores</b>Cuáles de los once baten al índice.</figcaption>
+              </figure>
+              <figure>
+                <a href="04-cuando-entrar.png" data-visor>
+                  <img src="04-cuando-entrar.png" alt="Página sobre el momento de entrada: invertir de golpe frente a repartir"
+                       width="1968" height="1128" loading="lazy">
+                </a>
+                <figcaption><b>Cuándo entrar</b>De una vez o en doce aportaciones.</figcaption>
+              </figure>
+              <figure>
+                <a href="05-cuanto-tiempo.png" data-visor>
+                  <img src="05-cuanto-tiempo.png" alt="Página sobre el plazo: simulador de rentabilidad por años de permanencia"
+                       width="1968" height="1128" loading="lazy">
+                </a>
+                <figcaption><b>Cuánto tiempo</b>Simulador sobre 1.562 periodos.</figcaption>
+              </figure>
+            </div>
+          </article>
+
+            <!-- Panel interactivo: se dibuja con los datos reales del análisis -->
+            <div class="panelint">
+              <div class="panelint__head">
+                <b><span class="pulso"></span> Panel interactivo · pruébalo tú mismo</b>
+                <span>Datos reales del análisis · 461 empresas · 2016 – 2026</span>
+              </div>
+
+              <div class="panelint__cuerpo">
+
+                <!-- Herramienta 1: intentar ganarle al índice -->
+                <section class="herram">
+                  <h4>¿Le ganarías al índice eligiendo una empresa?</h4>
+                  <p class="pie">
+                    1.000 € invertidos en enero de 2016 y olvidados hasta octubre de 2026.
+                    Elige una de las 461 empresas, o deja que la suerte decida por ti.
+                  </p>
+
+                  <div class="mandos">
+                    <button class="btn btn--solid" type="button" id="j-azar">Elegir una al azar</button>
+                    <div class="campo">
+                      <label for="j-empresa">O elígela tú</label>
+                      <select id="j-empresa"></select>
+                    </div>
+                  </div>
+
+                  <div class="duelo">
+                    <div class="lado">
+                      <p class="lado__quien" id="j-nombre">Nvidia</p>
+                      <p class="lado__cifra" id="j-dinero">292.059 €</p>
+                      <div class="pista"><i id="j-barra" style="width:100%"></i></div>
+                      <p class="lado__pie" id="j-detalle">Tecnología · riesgo 48,2 % · peor caída −66,3 %</p>
+                    </div>
+                    <div class="lado">
+                      <p class="lado__quien">Índice S&amp;P 500</p>
+                      <p class="lado__cifra" id="j-indice">4.606 €</p>
+                      <div class="pista"><i class="pista--gris" id="j-barra-ind" style="width:100%"></i></div>
+                      <p class="lado__pie">Comprando el índice entero, sin elegir nada</p>
+                    </div>
+                  </div>
+
+                  <p class="veredicto bloque-azul" id="j-veredicto">Pulsa el botón para probar suerte.</p>
+                  <p class="marcador" id="j-marcador">De las 461 empresas, solo 149 superan al índice. Una de cada tres.</p>
+                </section>
+
+                <!-- Herramienta 2: cuánto tiempo hay que aguantar -->
+                <section class="herram">
+                  <h4>¿Y cuánto tiempo hay que aguantar?</h4>
+                  <p class="pie">
+                    Mueve el plazo. Cada valor resume todos los periodos de esa duración
+                    que caben en 33 años de histórico del índice.
+                  </p>
+
+                  <div class="mandos">
+                    <div class="campo campo--ancho">
+                      <label for="t-plazo">Años invertido</label>
+                      <input type="range" id="t-plazo" min="0" max="4" value="0" step="1" list="t-marcas">
+                      <datalist id="t-marcas">
+                        <option value="0" label="1"></option>
+                        <option value="1" label="3"></option>
+                        <option value="2" label="5"></option>
+                        <option value="3" label="10"></option>
+                        <option value="4" label="20"></option>
+                      </datalist>
+                      <span class="escala"><span>1</span><span>3</span><span>5</span><span>10</span><span>20</span></span>
+                    </div>
+                  </div>
+
+                  <p class="veredicto bloque-azul" id="t-grande">
+                    <strong id="t-pct">82,2</strong> de cada 100 periodos de <strong id="t-anios">1 año</strong> acabaron en positivo
+                  </p>
+
+                  <dl class="kpis">
+                    <div class="kpi"><dt>Periodos analizados</dt><dd id="t-n">394</dd></div>
+                    <div class="kpi"><dt>Rentabilidad anual mediana</dt><dd id="t-med">14,6 %</dd></div>
+                    <div class="kpi"><dt>Peor resultado</dt><dd id="t-peor">−43,4 %</dd></div>
+                    <div class="kpi"><dt>Mejor resultado</dt><dd id="t-mejor">+56,2 %</dd></div>
+                  </dl>
+                </section>
+              </div>
+            </div>
+        </div>
+
+        <!-- Proyecto 2 -->
+        <div id="panel-vivienda" role="tabpanel" aria-labelledby="tab-vivienda" hidden>
+          <article class="project">
+            <div class="project__body">
+              <div class="project__head">
+                <h3>¿En qué zonas buscar vivienda, para vivir o para alquilar?</h3>
+                <span class="stamp stamp--wip">En desarrollo</span>
+              </div>
+              <p>
+                Comparador de municipios construido solo con datos públicos: precios de
+                compra, rentas de alquiler, renta media de la zona, servicios, transporte
+                y zonas verdes. La idea es que cada persona ajuste el peso de lo que le
+                importa y obtenga su propia lista de zonas, en lugar de una única
+                clasificación cerrada.
+              </p>
+              <ul class="tags"><li>Python</li><li>Datos abiertos</li><li>SQL</li><li>Power BI</li></ul>
+            </div>
+          </article>
+        </div>
+
+        <!-- Proyecto 3 -->
+        <div id="panel-solar" role="tabpanel" aria-labelledby="tab-solar" hidden>
+          <article class="project">
+            <div class="project__body">
+              <div class="project__head">
+                <h3>¿Cuánta factura eléctrica puede cubrir el autoconsumo solar en una industria?</h3>
+                <span class="stamp stamp--wip">En desarrollo</span>
+              </div>
+              <p>
+                Cruce del consumo eléctrico real por sector y franja horaria con la
+                producción solar estimada para esa ubicación y los precios del mercado
+                eléctrico. El objetivo es calcular qué parte de la factura cubriría una
+                instalación según su tamaño, y en cuánto tiempo se amortizaría.
+              </p>
+              <ul class="tags"><li>Python</li><li>PVGIS</li><li>API de REE</li><li>Power BI</li></ul>
+            </div>
+          </article>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ HERRAMIENTAS ============ -->
+  <section id="herramientas">
+    <div class="grid" data-anim>
+      <p class="rail">Herramientas</p>
+      <div>
+        <h2>Con qué trabajo</h2>
+        <ul class="tools">
+          <li><b>Python</b><span>pandas para limpiar y analizar series de datos, web scraping, automatización de descargas y gráficos con matplotlib.</span></li>
+          <li><b>SQL</b><span>MySQL: agregaciones, joins, CTEs y funciones de ventana sobre tablas de más de un millón de filas.</span></li>
+          <li><b>Power BI</b><span>Modelo en estrella, medidas DAX, parámetros what-if, páginas de información sobre herramientas y formato condicional.</span></li>
+          <li><b>Tableau</b><span>Visualización y cuadros de mando, dentro del máster.</span></li>
+          <li><b>Git y GitHub</b><span>Proyectos versionados, documentados y reproducibles por cualquiera que los descargue.</span></li>
+          <li><b>Entorno industrial</b><span>TIA Portal, AutoCAD y SolidWorks. Lectura de datos de monitorización de procesos y equipos de potencia.</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ EXPERIENCIA ============ -->
+  <section id="experiencia">
+    <div class="grid" data-anim>
+      <p class="rail">Experiencia</p>
+      <div>
+        <h2>Trayectoria</h2>
+
+        <div class="timeline">
+        <div class="entry">
+          <time>04/2022 — Actualidad</time>
+          <div>
+            <h3>Técnico de testeo y ensayo eléctrico</h3>
+            <p class="org">Power Electronics · Valencia</p>
+            <ul>
+              <li>Ensayo y puesta en marcha de inversores solares centrales de hasta 4,4 MW, etapas de potencia y electrolineras.</li>
+              <li>Registro estructurado de tiempos y parámetros de ensayo en base de datos y Excel, asegurando la trazabilidad de cada equipo.</li>
+              <li>Diagnóstico de incidencias a partir de datos de monitorización de proceso, con análisis de resultados para identificar fallos recurrentes.</li>
+            </ul>
+            <div class="highlight">
+              <span class="insignia">Internacional</span>
+              <h4>Técnico SAT — Estados Unidos</h4>
+              <p class="org">11 meses acumulados en distintos periodos</p>
+              <ul>
+                <li>Responsable de la puesta en marcha de una planta solar de 84 inversores en tres meses, coordinando y formando a los técnicos locales de apoyo.</li>
+                <li>Soporte técnico posventa y gestión de requerimientos del cliente en 12 plantas solares.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="entry">
+          <time>06/2021 — 04/2022</time>
+          <div>
+            <h3>Técnico de mantenimiento industrial</h3>
+            <p class="org">Juan Luna S.L.U. · Valencia</p>
+            <ul>
+              <li>Mantenimiento preventivo y correctivo de las líneas de producción.</li>
+              <li>Detección y resolución de averías mecánicas, eléctricas y neumáticas.</li>
+            </ul>
+          </div>
+        </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FORMACIÓN ============ -->
+  <section id="formacion">
+    <div class="grid" data-anim>
+      <p class="rail">Formación</p>
+      <div>
+        <h2>Formación</h2>
+
+        <div class="timeline timeline--estudios">
+        <div class="entry">
+          <time>2026 · En curso</time>
+          <div>
+            <h3>Máster en Data Analytics</h3>
+            <p class="org">PontIA Tech</p>
+            <p>Python, web scraping y SQL. Tableau y Power BI. Business Intelligence y Big Data.</p>
+          </div>
+        </div>
+        <div class="entry">
+          <time>2024 — 2025</time>
+          <div>
+            <h3>Experto Universitario en Automatización Industrial</h3>
+            <p class="org">SEAS · Universidad San Jorge</p>
+            <p>Autómatas programables avanzado (TIA Portal). Comunicación industrial y monitorización de procesos.</p>
+          </div>
+        </div>
+        <div class="entry">
+          <time>2020 — 2023</time>
+          <div>
+            <h3>CFGS Sistemas Electrotécnicos y Automatizados</h3>
+            <p class="org">Escuelas de Artesanos · Valencia</p>
+            <p>Programación de autómatas (PLC), automatización y control de instalaciones eléctricas industriales, sistemas y circuitos electrónicos.</p>
+          </div>
+        </div>
+        <div class="entry">
+          <time>2018 — 2020</time>
+          <div>
+            <h3>CFGS Mecatrónica Industrial</h3>
+            <p class="org">Escuelas de Artesanos · Valencia</p>
+            <p>Sistemas hidráulicos, neumáticos, eléctricos y electrónicos. Diseño con AutoCAD y SolidWorks.</p>
+          </div>
+        </div>
+        </div>
+
+        <h2 style="margin-top:3rem">Idiomas</h2>
+        <dl class="langs">
+          <div><dt>Español</dt><dd>Nativo</dd></div>
+          <div><dt>Valenciano</dt><dd>Competencia profesional</dd></div>
+          <div><dt>Inglés</dt><dd>Nivel B2</dd></div>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CONTACTO ============ -->
+  <section id="contacto">
+    <div class="grid cierre" data-anim>
+      <p class="rail">Contacto</p>
+      <div>
+        <h2>Hablamos</h2>
+        <p>
+          Estoy abierto a oportunidades de analista de datos, en Valencia o en remoto.
+          Escríbeme y te contesto.
+        </p>
+
+        <div class="actions">
+          <a class="btn btn--solid btn--grande" href="mailto:marcosguerrero19@hotmail.es">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>
+            </svg>
+            marcosguerrero19@hotmail.es
+          </a>
+          <a class="btn btn--grande" href="CV-Marcos-Guerrero-Sanchez.pdf" data-visor>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/>
+              <path d="M14 3v5h5"/>
+            </svg>
+            Ver el CV
+          </a>
+        </div>
+
+        <p class="enlaces">
+          <a href="https://www.linkedin.com/in/marcos-guerrero-sanchez" target="_blank" rel="noopener">LinkedIn ↗</a>
+          <a href="https://github.com/Marcosguerrero19" target="_blank" rel="noopener">GitHub ↗</a>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span>© 2026 Marcos Guerrero Sánchez</span>
+    <span>Valencia, España</span>
+  </footer>
+
+</div>
+</div>
+
+<!-- Visor de imágenes. Empieza oculto y solo lo abre el script. -->
+<div class="lightbox" id="visor" role="dialog" aria-modal="true" aria-label="Imagen ampliada" hidden>
+  <button class="lightbox__close" type="button" id="visor-cerrar" aria-label="Cerrar la imagen">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+  </button>
+  <img id="visor-img" src="" alt="">
+  <div class="visor__doc" id="visor-doc" hidden>
+    <iframe id="visor-frame" title="Currículum de Marcos Guerrero Sánchez"></iframe>
+    <a class="btn btn--solid" id="visor-descarga" href="CV-Marcos-Guerrero-Sanchez.pdf" download>Descargar el PDF</a>
+  </div>
+</div>
+
+<script type="application/json" id="datos-sp500">{"empresas":[["A","Agilent Technologies","Salud",0.1515,0.2805,-0.4319,3.565],["AAPL","Apple Inc.","Tecnología",0.2797,0.2886,-0.3852,13.211],["ABBV","AbbVie","Salud",0.2051,0.2601,-0.4509,6.445],["ABT","Abbott Laboratories","Salud",0.1023,0.2403,-0.3964,1.853],["ACGL","Arch Capital Group","Financiero",0.1471,0.2699,-0.5384,3.379],["ACN","Accenture","Tecnología",0.087,0.2851,-0.6817,1.454],["ADBE","Adobe Inc.","Tecnología",0.0942,0.3461,-0.719,1.634],["ADI","Analog Devices","Tecnología",0.2287,0.3261,-0.3362,8.174],["ADM","Archer Daniels Midland","Consumo básico",0.1097,0.2722,-0.5414,2.066],["ADP","Automatic Data Processing","Industrial",0.1423,0.2437,-0.4078,3.185],["ADSK","Autodesk","Tecnología",0.1349,0.3679,-0.5199,2.902],["AEE","Ameren","Servicios públicos",0.1158,0.2155,-0.2909,2.253],["AEP","American Electric Power","Servicios públicos",0.1097,0.2076,-0.3291,2.067],["AES","AES Corporation","Servicios públicos",0.0842,0.3536,-0.6343,1.387],["AFL","Aflac","Financiero",0.1607,0.2523,-0.5489,3.972],["AIG","American International Group","Financiero",0.0488,0.3192,-0.6958,0.669],["AIZ","Assurant","Financiero",0.1423,0.2692,-0.4463,3.187],["AJG","Arthur J. Gallagher & Co.","Financiero",0.1971,0.2328,-0.444,5.935],["AKAM","Akamai Technologies","Tecnología",0.0687,0.3587,-0.4684,1.045],["ALB","Albemarle Corporation","Materiales",0.0718,0.4767,-0.839,1.109],["ALGN","Align Technology","Salud",0.0769,0.4828,-0.8289,1.22],["ALL","Allstate","Financiero",0.1565,0.2478,-0.4139,3.782],["ALLE","Allegion","Industrial",0.0944,0.2684,-0.4325,1.641],["AMAT","Applied Materials","Tecnología",0.3756,0.4386,-0.5514,29.948],["AMD","Advanced Micro Devices","Tecnología",0.6503,0.6008,-0.6545,218.531],["AME","Ametek","Industrial",0.1629,0.2429,-0.4272,4.073],["AMGN","Amgen","Salud",0.1264,0.2509,-0.2486,2.599],["AMP","Ameriprise Financial","Financiero",0.181,0.3365,-0.5388,4.995],["AMT","American Tower","Inmobiliario",0.0881,0.262,-0.4534,1.482],["AMZN","Amazon","Consumo discrecional",0.2165,0.3294,-0.5615,7.24],["ANET","Arista Networks","Tecnología",0.4237,0.4532,-0.522,43.804],["AON","Aon plc","Financiero",0.1181,0.2352,-0.3873,2.326],["AOS","A. O. Smith","Industrial",0.0561,0.2718,-0.4681,0.799],["APA","APA Corporation","Energía",0.0285,0.5798,-0.9349,0.354],["APD","Air Products","Materiales",0.1096,0.2566,-0.3177,2.063],["APH","Amphenol","Tecnología",0.2873,0.2805,-0.3756,14.152],["APO","Apollo Global Management","Financiero",0.259,0.3765,-0.5348,10.924],["APTV","Aptiv","Consumo discrecional",-0.0388,0.4094,-0.7585,-0.347],["ARE","Alexandria Real Estate Equities","Inmobiliario",-0.0254,0.2943,-0.7792,-0.242],["ARES","Ares Management","Financiero",0.2812,0.3661,-0.4997,13.4],["ATO","Atmos Energy","Servicios públicos",0.1187,0.2094,-0.3291,2.343],["AVGO","Broadcom","Tecnología",0.3855,0.3937,-0.483,32.423],["AVY","Avery Dennison","Materiales",0.1189,0.2684,-0.4352,2.35],["AWK","American Water Works","Servicios públicos",0.0946,0.2354,-0.371,1.645],["AXON","Axon Enterprise","Industrial",0.3493,0.496,-0.6028,24.127],["AXP","American Express","Financiero",0.1681,0.3138,-0.4964,4.323],["AZO","AutoZone","Consumo discrecional",0.1374,0.2637,-0.4214,2.997],["BA","Boeing","Industrial",0.0391,0.4096,-0.7792,0.511],["BAC","Bank of America","Financiero",0.1422,0.3066,-0.4895,3.182],["BALL","Ball Corporation","Materiales",0.0571,0.279,-0.5509,0.818],["BAX","Baxter International","Salud",-0.0239,0.2933,-0.8115,-0.229],["BBY","Best Buy","Consumo discrecional",0.1438,0.3817,-0.526,3.244],["BDX","Becton Dickinson","Salud",0.0624,0.2351,-0.4006,0.919],["BEN","Franklin Resources","Financiero",0.0373,0.3262,-0.621,0.484],["BF-B","Brown–Forman","Consumo básico",-0.0169,0.279,-0.6895,-0.168],["BG","Bunge Global","Consumo básico",0.0716,0.3154,-0.6049,1.105],["BIIB","Biogen","Salud",-0.0245,0.4101,-0.7266,-0.234],["BKNG","Booking Holdings","Consumo discrecional",0.1172,0.328,-0.4777,2.295],["BKR","Baker Hughes","Energía",0.0782,0.3916,-0.7832,1.248],["BLK","BlackRock","Financiero",0.1436,0.2772,-0.439,3.237],["BMY","Bristol Myers Squibb","Salud",0.0233,0.2523,-0.4767,0.282],["BNY","BNY Mellon","Financiero",0.1541,0.2686,-0.5049,3.675],["BR","Broadridge Financial Solutions","Industrial",0.1326,0.2401,-0.4821,2.818],["BRK-B","Berkshire Hathaway","Financiero",0.136,0.1916,-0.2957,2.944],["BRO","Brown & Brown","Financiero",0.1472,0.2385,-0.5585,3.383],["BSX","Boston Scientific","Salud",0.0837,0.2756,-0.6155,1.375],["BX","Blackstone Inc.","Financiero",0.189,0.3602,-0.4929,5.445],["BXP","BXP, Inc.","Inmobiliario",-0.028,0.3154,-0.6359,-0.264],["C","Citigroup","Financiero",0.1218,0.332,-0.5651,2.446],["CAH","Cardinal Health","Salud",0.1268,0.29,-0.4844,2.615],["CASY","Casey's","Consumo básico",0.1817,0.2874,-0.3613,5.03],["CAT","Caterpillar Inc.","Industrial",0.2872,0.3126,-0.4336,14.134],["CB","Chubb Limited","Financiero",0.1271,0.2344,-0.4259,2.624],["CBOE","Cboe Global Markets","Financiero",0.1706,0.2583,-0.4323,4.446],["CBRE","CBRE Group","Inmobiliario",0.1331,0.3317,-0.5357,2.837],["CCI","Crown Castle","Inmobiliario",0.0363,0.2635,-0.5972,0.468],["CCL","Carnival Corporation","Consumo discrecional",-0.0515,0.5637,-0.9037,-0.434],["CDNS","Cadence Design Systems","Tecnología",0.3025,0.3388,-0.3421,16.187],["CDW","CDW Corporation","Tecnología",0.1366,0.3142,-0.6037,2.966],["CF","CF Industries","Materiales",0.1297,0.4086,-0.6074,2.715],["CFG","Citizens Financial Group","Financiero",0.1276,0.3768,-0.656,2.641],["CHD","Church & Dwight","Consumo básico",0.0968,0.2167,-0.3172,1.704],["CHRW","C.H. Robinson","Industrial",0.1057,0.2939,-0.4055,1.948],["CHTR","Charter Communications","Comunicaciones",-0.049,0.35,-0.8741,-0.418],["CI","Cigna","Salud",0.0735,0.3046,-0.4247,1.145],["CIEN","Ciena","Tecnología",0.3339,0.4587,-0.4954,21.222],["CINF","Cincinnati Financial","Financiero",0.1314,0.2827,-0.5812,2.775],["CL","Colgate-Palmolive","Consumo básico",0.0537,0.1964,-0.2905,0.757],["CLX","Clorox","Consumo básico",-0.0077,0.2453,-0.5876,-0.079],["CMCSA","Comcast","Comunicaciones",0.0048,0.2641,-0.5733,0.053],["CME","CME Group","Financiero",0.1554,0.239,-0.3736,3.735],["CMG","Chipotle Mexican Grill","Consumo discrecional",0.124,0.3605,-0.5889,2.519],["CMI","Cummins","Industrial",0.2088,0.2846,-0.4405,6.7],["CMS","CMS Energy","Servicios públicos",0.0902,0.2043,-0.2955,1.533],["CNC","Centene Corporation","Salud",0.0655,0.3846,-0.7407,0.98],["CNP","CenterPoint Energy","Servicios públicos",0.1072,0.2557,-0.598,1.991],["COF","Capital One","Financiero",0.1209,0.3672,-0.6025,2.414],["COHR","Coherent Corp.","Tecnología",0.3059,0.576,-0.7222,16.682],["COO","Cooper Companies (The)","Salud",0.0478,0.2809,-0.5325,0.652],["COP","ConocoPhillips","Energía",0.1368,0.3814,-0.7066,2.974],["COR","Cencora","Salud",0.1454,0.2734,-0.3244,3.309],["COST","Costco","Consumo básico",0.1995,0.218,-0.314,6.085],["CPAY","Corpay","Financiero",0.1015,0.3269,-0.5013,1.83],["CPRT","Copart","Industrial",0.1775,0.2786,-0.583,4.802],["CPT","Camden Property Trust","Inmobiliario",0.0645,0.2408,-0.5022,0.96],["CRH","CRH plc","Materiales",0.1322,0.3089,-0.5325,2.805],["CRL","Charles River Laboratories","Salud",0.1336,0.3755,-0.7823,2.857],["CRM","Salesforce","Tecnología",0.109,0.3636,-0.5867,2.044],["CSCO","Cisco","Tecnología",0.1842,0.2621,-0.4195,5.167],["CSGP","CoStar Group","Inmobiliario",0.0385,0.333,-0.7298,0.502],["CSX","CSX Corporation","Industrial",0.1889,0.2766,-0.4055,5.437],["CTAS","Cintas","Industrial",0.2411,0.2637,-0.4838,9.223],["CTSH","Cognizant","Tecnología",0.0147,0.2974,-0.5608,0.17],["CVS","CVS Health","Salud",0.0196,0.2883,-0.5679,0.232],["CVX","Chevron Corporation","Energía",0.131,0.2905,-0.5577,2.762],["D","Dominion Energy","Servicios públicos",0.0352,0.2325,-0.522,0.451],["DAL","Delta Air Lines","Industrial",0.0627,0.4149,-0.6918,0.925],["DD","DuPont","Industrial",0.0585,0.3105,-0.7274,0.843],["DE","Deere & Company","Industrial",0.2352,0.3034,-0.3791,8.716],["DECK","Deckers Brands","Consumo discrecional",0.2447,0.4201,-0.6526,9.548],["DG","Dollar General","Consumo básico",0.0682,0.3153,-0.7261,1.035],["DGX","Quest Diagnostics","Salud",0.139,0.2369,-0.366,3.057],["DHI","D. R. Horton","Consumo discrecional",0.1614,0.3557,-0.5362,4.006],["DHR","Danaher Corporation","Salud",0.1787,0.3167,-0.4382,4.869],["DIS","Walt Disney Company (The)","Comunicaciones",0.0128,0.2843,-0.6072,0.147],["DLR","Digital Realty","Inmobiliario",0.1202,0.2817,-0.4852,2.392],["DLTR","Dollar Tree","Consumo básico",0.0387,0.3669,-0.6484,0.505],["DOC","Healthpeak Properties","Inmobiliario",-0.0035,0.2965,-0.5407,-0.037],["DOV","Dover Corporation","Industrial",0.1508,0.2675,-0.4524,3.535],["DPZ","Domino's","Consumo discrecional",0.1147,0.3026,-0.4781,2.219],["DRI","Darden Restaurants","Consumo discrecional",0.1459,0.3524,-0.728,3.332],["DTE","DTE Energy","Servicios públicos",0.0963,0.2197,-0.4245,1.689],["DUK","Duke Energy","Servicios públicos",0.0903,0.2015,-0.3737,1.536],["DVA","DaVita","Salud",0.0932,0.3442,-0.511,1.61],["DVN","Devon Energy","Energía",0.0755,0.5049,-0.8851,1.188],["DXCM","Dexcom","Salud",0.1448,0.4824,-0.6632,3.286],["EBAY","eBay Inc.","Consumo discrecional",0.1572,0.3114,-0.5358,3.813],["ECHO","EchoStar","Comunicaciones",0.1079,0.5317,-0.8081,2.014],["ECL","Ecolab","Materiales",0.101,0.2492,-0.437,1.817],["ED","Consolidated Edison","Servicios públicos",0.0856,0.2073,-0.3091,1.42],["EFX","Equifax","Industrial",0.0369,0.3153,-0.5443,0.477],["EG","Everest Group","Financiero",0.091,0.2679,-0.4421,1.554],["EIX","Edison International","Servicios públicos",0.0368,0.2886,-0.4388,0.476],["EL","Estée Lauder Companies (The)","Consumo básico",0.024,0.3628,-0.8582,0.291],["ELV","Elevance Health","Salud",0.1221,0.3082,-0.5038,2.454],["EME","Emcor","Industrial",0.3069,0.3338,-0.48,16.833],["EMR","Emerson Electric","Industrial",0.1498,0.2888,-0.5077,3.492],["EOG","EOG Resources","Energía",0.106,0.3902,-0.7713,1.957],["EQIX","Equinix","Inmobiliario",0.1444,0.2714,-0.4177,3.27],["EQT","EQT Corporation","Energía",0.0667,0.4823,-0.8828,1.003],["ERIE","Erie Indemnity","Financiero",0.1072,0.2957,-0.6087,1.992],["ES","Eversource Energy","Servicios públicos",0.0606,0.2391,-0.4169,0.883],["ESS","Essex Property Trust","Inmobiliario",0.0467,0.2553,-0.4484,0.634],["ETN","Eaton Corporation","Industrial",0.2434,0.3047,-0.4455,9.427],["ETR","Entergy","Servicios públicos",0.1503,0.2373,-0.4199,3.514],["EVRG","Evergy","Servicios públicos",0.1005,0.2247,-0.3879,1.802],["EW","Edwards Lifesciences","Salud",0.1155,0.3235,-0.5432,2.242],["EXC","Exelon","Servicios públicos",0.1095,0.2371,-0.4004,2.06],["EXPD","Expeditors International","Industrial",0.1608,0.2484,-0.3562,3.978],["EXPE","Expedia Group","Consumo discrecional",0.0849,0.4364,-0.7051,1.403],["EXR","Extra Space Storage","Inmobiliario",0.0806,0.2673,-0.5136,1.303],["F","Ford Motor Company","Consumo discrecional",0.0422,0.369,-0.6477,0.56],["FANG","Diamondback Energy","Energía",0.1327,0.4837,-0.8872,2.822],["FAST","Fastenal","Industrial",0.1933,0.2664,-0.3071,5.697],["FCX","Freeport-McMoRan","Materiales",0.2644,0.5213,-0.7259,11.492],["FDS","FactSet","Financiero",0.0696,0.2849,-0.6113,1.062],["FDX","FedEx","Industrial",0.1068,0.3257,-0.6597,1.981],["FE","FirstEnergy","Servicios públicos",0.0776,0.2466,-0.4768,1.236],["FFIV","F5, Inc.","Tecnología",0.1602,0.2986,-0.5459,3.95],["FICO","Fair Isaac","Tecnología",0.201,0.3991,-0.7513,6.18],["FIS","Fidelity National Information Services","Financiero",-0.0331,0.2987,-0.7604,-0.304],["FISV","Fiserv","Financiero",0.0018,0.3155,-0.8134,0.02],["FITB","Fifth Third Bancorp","Financiero",0.131,0.3583,-0.6406,2.763],["FIX","Comfort Systems USA","Industrial",0.4791,0.4264,-0.4968,66.54],["FLEX","Flex Ltd.","Tecnología",0.2805,0.4419,-0.7002,13.313],["FRT","Federal Realty Investment Trust","Inmobiliario",0.0091,0.2869,-0.5647,0.102],["FSLR","First Solar","Tecnología",0.0954,0.5051,-0.6403,1.665],["FTNT","Fortinet","Tecnología",0.3808,0.4075,-0.3832,31.211],["GD","General Dynamics","Industrial",0.1105,0.2255,-0.5163,2.09],["GDDY","GoDaddy","Tecnología",0.1135,0.3579,-0.6502,2.18],["GE","GE Aerospace","Industrial",0.0839,0.3559,-0.8119,1.38],["GEN","Gen Digital","Tecnología",0.1051,0.3338,-0.4841,1.932],["GILD","Gilead Sciences","Salud",0.0775,0.2577,-0.3601,1.233],["GIS","General Mills","Consumo básico",-0.0163,0.224,-0.5963,-0.162],["GL","Globe Life","Financiero",0.1138,0.3156,-0.6162,2.188],["GLW","Corning Inc.","Tecnología",0.2545,0.3641,-0.5148,10.476],["GM","General Motors","Consumo discrecional",0.1111,0.364,-0.5996,2.107],["GNRC","Generac","Industrial",0.21,0.4569,-0.8375,6.781],["GOOG","Alphabet Inc. (Class C)","Comunicaciones",0.2323,0.2894,-0.446,8.467],["GOOGL","Alphabet Inc. (Class A)","Comunicaciones",0.2308,0.2906,-0.4432,8.349],["GPC","Genuine Parts Company","Consumo discrecional",0.0701,0.281,-0.5489,1.073],["GPN","Global Payments","Financiero",0.0314,0.3465,-0.7017,0.395],["GRMN","Garmin","Consumo discrecional",0.2355,0.2893,-0.5463,8.736],["GS","Goldman Sachs","Financiero",0.1864,0.2996,-0.4875,5.293],["GWW","W. W. Grainger","Industrial",0.2063,0.2812,-0.416,6.524],["HAL","Halliburton","Energía",0.014,0.4526,-0.9145,0.161],["HAS","Hasbro","Consumo discrecional",0.066,0.3343,-0.6384,0.99],["HBAN","Huntington Bancshares","Financiero",0.077,0.3406,-0.5498,1.222],["HCA","HCA Healthcare","Salud",0.2038,0.3238,-0.5474,6.36],["HD","Home Depot (The)","Consumo discrecional",0.1031,0.2476,-0.3799,1.876],["HIG","Hartford (The)","Financiero",0.132,0.287,-0.5759,2.799],["HII","Huntington Ingalls Industries","Industrial",0.0932,0.3052,-0.497,1.61],["HLT","Hilton Worldwide","Consumo discrecional",0.2124,0.2879,-0.5082,6.945],["HON","Honeywell Technologies","Industrial",0.096,0.2362,-0.4301,1.681],["HPE","Hewlett Packard Enterprise","Tecnología",0.251,0.3847,-0.5687,10.14],["HPQ","HP Inc.","Tecnología",0.1311,0.3575,-0.5123,2.764],["HRL","Hormel Foods","Consumo básico",-0.0391,0.2366,-0.5913,-0.349],["HSIC","Henry Schein","Salud",0.0304,0.2708,-0.4142,0.38],["HST","Host Hotels & Resorts","Inmobiliario",0.0828,0.3382,-0.5504,1.354],["HSY","Hershey Company (The)","Consumo básico",0.0847,0.2329,-0.4525,1.4],["HUBB","Hubbell Incorporated","Industrial",0.1774,0.2867,-0.4163,4.798],["HUM","Humana","Salud",0.0937,0.3447,-0.6992,1.623],["IBKR","Interactive Brokers","Financiero",0.2254,0.3354,-0.5509,7.915],["IBM","IBM","Tecnología",0.0977,0.2783,-0.4059,1.726],["ICE","Intercontinental Exchange","Financiero",0.1254,0.2247,-0.3432,2.565],["IDXX","Idexx Laboratories","Salud",0.2026,0.3259,-0.54,6.283],["IEX","IDEX Corporation","Industrial",0.1253,0.239,-0.3552,2.564],["IFF","International Flavors & Fragrances","Materiales",-0.0069,0.3036,-0.5742,-0.072],["ILMN","Illumina, Inc.","Salud",0.0433,0.4294,-0.8623,0.577],["INCY","Incyte","Salud",0.0082,0.3527,-0.6647,0.092],["INTC","Intel","Tecnología",0.1347,0.448,-0.708,2.898],["INTU","Intuit","Tecnología",0.124,0.3396,-0.6819,2.519],["IP","International Paper","Materiales",0.0342,0.3247,-0.5527,0.436],["IQV","IQVIA","Salud",0.1342,0.3175,-0.5152,2.876],["IRM","Iron Mountain","Inmobiliario",0.208,0.2945,-0.3903,6.646],["ISRG","Intuitive Surgical","Salud",0.1977,0.3244,-0.499,5.971],["IT","Gartner","Tecnología",0.0746,0.3426,-0.7721,1.169],["ITW","Illinois Tool Works","Industrial",0.1303,0.2353,-0.3785,2.737],["IVZ","Invesco","Financiero",0.0341,0.3899,-0.7972,0.434],["J","Jacobs Solutions","Industrial",0.1469,0.277,-0.3933,3.371],["JBHT","J.B. Hunt","Industrial",0.125,0.2996,-0.4241,2.552],["JBL","Jabil","Tecnología",0.281,0.3751,-0.5734,13.377],["JCI","Johnson Controls","Industrial",0.194,0.2801,-0.4636,5.744],["JKHY","Jack Henry & Associates","Financiero",0.0772,0.2379,-0.3835,1.226],["JNJ","Johnson & Johnson","Salud",0.1231,0.185,-0.2737,2.487],["JPM","JPMorgan Chase","Financiero",0.1973,0.2723,-0.4363,5.945],["KDP","Keurig Dr Pepper","Consumo básico",0.0991,0.2383,-0.3687,1.765],["KEY","KeyCorp","Financiero",0.0844,0.3899,-0.6523,1.391],["KEYS","Keysight Technologies","Tecnología",0.2759,0.3276,-0.4262,12.763],["KHC","Kraft Heinz","Consumo básico",-0.0624,0.2697,-0.7607,-0.5],["KIM","Kimco Realty","Inmobiliario",0.0349,0.3309,-0.6952,0.447],["KKR","KKR & Co.","Financiero",0.1983,0.3681,-0.4942,6.009],["KLAC","KLA Corporation","Tecnología",0.3882,0.4225,-0.4447,33.132],["KMB","Kimberly-Clark","Consumo básico",0.0111,0.2108,-0.3406,0.126],["KMI","Kinder Morgan","Energía",0.1271,0.2954,-0.5513,2.623],["KO","Coca-Cola Company (The)","Consumo básico",0.1039,0.1816,-0.3699,1.899],["KR","Kroger","Consumo básico",0.0595,0.2896,-0.5137,0.864],["L","Loews Corporation","Financiero",0.1062,0.2513,-0.4852,1.964],["LDOS","Leidos","Industrial",0.1276,0.281,-0.4947,2.64],["LEN","Lennar","Consumo discrecional",0.0634,0.3701,-0.588,0.939],["LH","Labcorp","Salud",0.1114,0.2637,-0.4658,2.118],["LHX","L3Harris","Industrial",0.1179,0.2561,-0.3816,2.32],["LII","Lennox International","Industrial",0.116,0.2972,-0.4688,2.258],["LIN","Linde plc","Materiales",0.1761,0.2268,-0.3259,4.728],["LITE","Lumentum","Tecnología",0.4368,0.5736,-0.6689,48.411],["LLY","Lilly (Eli)","Salud",0.301,0.2999,-0.3448,15.977],["LMT","Lockheed Martin","Industrial",0.1134,0.2372,-0.3667,2.178],["LNT","Alliant Energy","Servicios públicos",0.1064,0.2093,-0.3354,1.97],["LOW","Lowe's","Consumo discrecional",0.108,0.2891,-0.4863,2.017],["LRCX","Lam Research","Tecnología",0.4312,0.4555,-0.5639,46.379],["LULU","Lululemon Athletica","Consumo discrecional",0.0501,0.405,-0.8203,0.692],["LUV","Southwest Airlines","Industrial",0.0116,0.3724,-0.6476,0.132],["LVS","Las Vegas Sands","Consumo discrecional",0.009,0.3851,-0.5877,0.102],["LYB","LyondellBasell","Materiales",0.0212,0.3601,-0.6817,0.253],["LYV","Live Nation Entertainment","Comunicaciones",0.1999,0.3762,-0.6123,6.106],["MA","Mastercard","Financiero",0.1923,0.2661,-0.41,5.641],["MAA","Mid-America Apartment Communities","Inmobiliario",0.0617,0.2393,-0.454,0.905],["MAR","Marriott International","Consumo discrecional",0.1846,0.3249,-0.6126,5.194],["MAS","Masco","Industrial",0.1044,0.296,-0.4483,1.912],["MCD","McDonald's","Consumo discrecional",0.0929,0.2032,-0.369,1.602],["MCHP","Microchip Technology","Tecnología",0.139,0.418,-0.6377,3.057],["MCK","McKesson Corporation","Salud",0.1661,0.2907,-0.4423,4.229],["MCO","Moody's Corporation","Financiero",0.1678,0.2778,-0.4202,4.307],["MDLZ","Mondelez International","Consumo básico",0.055,0.2147,-0.2974,0.779],["MDT","Medtronic","Salud",0.0412,0.232,-0.451,0.544],["MET","MetLife","Financiero",0.1188,0.3028,-0.5516,2.347],["META","Meta Platforms","Comunicaciones",0.1997,0.3892,-0.7674,6.098],["MGM","MGM Resorts","Consumo discrecional",0.0313,0.4519,-0.8042,0.393],["MKC","McCormick & Company","Consumo básico",0.025,0.2419,-0.5313,0.305],["MLM","Martin Marietta Materials","Materiales",0.1325,0.3084,-0.4834,2.817],["MMM","3M","Industrial",0.0582,0.2612,-0.591,0.838],["MNST","Monster Beverage","Consumo básico",0.1272,0.2644,-0.3042,2.628],["MO","Altria","Consumo básico",0.091,0.2288,-0.5369,1.553],["MOS","Mosaic Company (The)","Materiales",-0.0181,0.4514,-0.8082,-0.178],["MPC","Marathon Petroleum","Energía",0.2627,0.4057,-0.7967,11.312],["MPWR","Monolithic Power Systems","Tecnología",0.348,0.4702,-0.5165,23.871],["MRK","Merck & Co.","Salud",0.1386,0.2318,-0.4344,3.042],["MRSH","Marsh McLennan","Financiero",0.1352,0.2088,-0.358,2.916],["MRVL","Marvell Technology","Tecnología",0.3879,0.5269,-0.6188,33.062],["MS","Morgan Stanley","Financiero",0.2152,0.3163,-0.5133,7.144],["MSCI","MSCI","Financiero",0.2268,0.3082,-0.4374,8.022],["MSFT","Microsoft","Tecnología",0.2519,0.275,-0.3715,10.222],["MSI","Motorola Solutions","Tecnología",0.2102,0.2503,-0.3281,6.797],["MTB","M&T Bank","Financiero",0.0892,0.323,-0.5297,1.509],["MTD","Mettler Toledo","Salud",0.1548,0.2945,-0.4347,3.706],["MU","Micron Technology","Tecnología",0.491,0.5184,-0.5763,72.638],["NCLH","Norwegian Cruise Line Holdings","Consumo discrecional",-0.115,0.609,-0.8725,-0.732],["NDAQ","Nasdaq, Inc.","Financiero",0.1792,0.2436,-0.3831,4.895],["NDSN","Nordson Corporation","Industrial",0.1777,0.2861,-0.4424,4.812],["NEE","NextEra Energy","Servicios públicos",0.136,0.2491,-0.4497,2.944],["NEM","Newmont","Materiales",0.2159,0.3675,-0.624,7.196],["NFLX","Netflix","Comunicaciones",0.1881,0.4162,-0.7595,5.393],["NI","NiSource","Servicios públicos",0.105,0.2293,-0.3095,1.93],["NKE","Nike, Inc.","Consumo discrecional",-0.0381,0.3198,-0.7909,-0.342],["NOC","Northrop Grumman","Industrial",0.1091,0.252,-0.378,2.049],["NOW","ServiceNow","Tecnología",0.2183,0.419,-0.6454,7.378],["NRG","NRG Energy","Servicios públicos",0.2572,0.4062,-0.4876,10.741],["NSC","Norfolk Southern","Industrial",0.1582,0.2753,-0.4442,3.859],["NTAP","NetApp","Tecnología",0.2591,0.3596,-0.5808,10.94],["NTRS","Northern Trust","Financiero",0.1132,0.3012,-0.5003,2.172],["NUE","Nucor","Materiales",0.2133,0.3576,-0.5721,7.012],["NVDA","Nvidia","Tecnología",0.6941,0.4912,-0.6634,290.059],["NVR","NVR, Inc.","Consumo discrecional",0.1318,0.3144,-0.4613,2.792],["NWS","News Corp (Class B)","Comunicaciones",0.095,0.297,-0.5184,1.655],["NWSA","News Corp (Class A)","Comunicaciones",0.0893,0.2949,-0.5063,1.51],["NXPI","NXP Semiconductors","Tecnología",0.1099,0.4083,-0.5326,2.072],["O","Realty Income","Inmobiliario",0.0568,0.2526,-0.4828,0.812],["ODFL","Old Dominion","Industrial",0.2358,0.3298,-0.4518,8.761],["OKE","Oneok","Energía",0.196,0.3972,-0.8017,5.861],["OMC","Omnicom Group","Comunicaciones",0.0387,0.2856,-0.4321,0.505],["ON","ON Semiconductor","Tecnología",0.213,0.5155,-0.7044,6.993],["ORCL","Oracle Corporation","Tecnología",0.1533,0.3538,-0.6458,3.643],["ORLY","O'Reilly Automotive","Consumo discrecional",0.167,0.265,-0.42,4.269],["OXY","Occidental Petroleum","Energía",0.0178,0.4776,-0.8839,0.209],["P","Everpure","Tecnología",0.2472,0.519,-0.6943,9.773],["PANW","Palo Alto Networks","Tecnología",0.2833,0.3998,-0.4798,13.649],["PAYX","Paychex","Industrial",0.1012,0.2532,-0.4495,1.821],["PCAR","Paccar","Industrial",0.1613,0.2626,-0.3784,4.0],["PCG","PG&E Corporation","Servicios públicos",-0.1153,0.5811,-0.9465,-0.732],["PEG","Public Service Enterprise Group","Servicios públicos",0.0969,0.2169,-0.4078,1.706],["PEP","PepsiCo","Consumo básico",0.0548,0.1955,-0.3032,0.777],["PFE","Pfizer","Salud",0.039,0.236,-0.5896,0.51],["PFG","Principal Financial Group","Financiero",0.127,0.3174,-0.6473,2.622],["PG","Procter & Gamble","Consumo básico",0.0927,0.1887,-0.2377,1.597],["PGR","Progressive Corporation","Financiero",0.2326,0.2446,-0.3035,8.496],["PH","Parker Hannifin","Industrial",0.2573,0.3121,-0.5468,10.758],["PHM","PulteGroup","Consumo discrecional",0.2048,0.3616,-0.6211,6.427],["PKG","Packaging Corporation of America","Materiales",0.1627,0.2765,-0.3818,4.067],["PLD","Prologis","Inmobiliario",0.143,0.2669,-0.433,3.214],["PM","Philip Morris International","Consumo básico",0.1348,0.2419,-0.4287,2.899],["PNC","PNC Financial Services","Financiero",0.1181,0.2921,-0.4958,2.326],["PNR","Pentair","Industrial",0.061,0.2964,-0.5308,0.892],["PNW","Pinnacle West Capital","Servicios públicos",0.0828,0.2229,-0.3928,1.353],["PODD","Insulet Corporation","Salud",0.1278,0.4281,-0.6302,2.65],["PPG","PPG Industries","Materiales",0.0245,0.2732,-0.4602,0.297],["PPL","PPL Corporation","Servicios públicos",0.046,0.2248,-0.4873,0.622],["PRU","Prudential Financial","Financiero",0.0806,0.316,-0.6589,1.303],["PSA","Public Storage","Inmobiliario",0.0569,0.2342,-0.3793,0.815],["PSX","Phillips 66","Energía",0.1648,0.3496,-0.6421,4.167],["PTC","PTC Inc.","Tecnología",0.1768,0.3479,-0.5437,4.765],["PWR","Quanta Services","Industrial",0.3931,0.3417,-0.4553,34.454],["PYPL","PayPal","Financiero",0.0456,0.3877,-0.873,0.616],["QCOM","Qualcomm","Tecnología",0.155,0.3931,-0.4429,3.714],["RCL","Royal Caribbean Group","Consumo discrecional",0.1168,0.5262,-0.833,2.285],["REG","Regency Centers","Inmobiliario",0.0455,0.2915,-0.5702,0.614],["REGN","Regeneron Pharmaceuticals","Salud",0.0357,0.3267,-0.5969,0.459],["RF","Regions Financial Corporation","Financiero",0.143,0.3555,-0.6073,3.216],["RJF","Raymond James Financial","Financiero",0.16,0.3097,-0.4559,3.941],["RL","Ralph Lauren Corporation","Consumo discrecional",0.1401,0.3867,-0.5514,3.1],["RMD","ResMed|","Salud",0.1612,0.3126,-0.5399,3.997],["ROK","Rockwell Automation","Industrial",0.166,0.311,-0.4509,4.222],["ROL","Rollins, Inc.","Industrial",0.1163,0.2527,-0.5423,2.269],["ROP","Roper Technologies","Tecnología",0.0709,0.2365,-0.4651,1.091],["ROST","Ross Stores","Consumo discrecional",0.1509,0.3123,-0.5141,3.541],["RSG","Republic Services","Industrial",0.1812,0.1896,-0.3402,5.002],["RTX","RTX Corporation","Industrial",0.1365,0.2736,-0.5198,2.962],["RVTY","Revvity","Salud",0.1088,0.31,-0.5901,2.039],["SBAC","SBA Communications","Inmobiliario",0.0617,0.2851,-0.559,0.905],["SBUX","Starbucks","Consumo discrecional",0.0641,0.2905,-0.4368,0.952],["SCHW","Charles Schwab Corporation","Financiero",0.1223,0.3335,-0.5108,2.463],["SHW","Sherwin-Williams","Materiales",0.1416,0.2657,-0.4246,3.158],["SJM","J.M. Smucker Company (The)","Consumo básico",0.0294,0.2444,-0.3811,0.365],["SKYD","Skydance Corporation","Comunicaciones",-0.122,0.4914,-0.9118,-0.754],["SLB","Schlumberger","Energía",-0.0042,0.4001,-0.8429,-0.044],["SMCI","Supermicro","Tecnología",0.306,0.7139,-0.8484,16.7],["SNA","Snap-on","Industrial",0.0992,0.2682,-0.4738,1.767],["SNPS","Synopsys","Tecnología",0.2532,0.3507,-0.4302,10.353],["SO","Southern Company","Servicios públicos",0.1024,0.2156,-0.3843,1.857],["SPG","Simon Property Group","Inmobiliario",0.0553,0.3609,-0.77,0.785],["SPGI","S&P Global","Financiero",0.162,0.2626,-0.3976,4.034],["SRE","Sempra","Servicios públicos",0.0866,0.246,-0.45,1.444],["STE","Steris","Salud",0.1152,0.2498,-0.3618,2.232],["STLD","Steel Dynamics","Materiales",0.2983,0.3925,-0.6846,15.607],["STT","State Street Corporation","Financiero",0.1275,0.3265,-0.5959,2.638],["STX","Seagate Technology","Tecnología",0.3896,0.4496,-0.5699,33.495],["STZ","Constellation Brands","Consumo básico",0.0029,0.2697,-0.5605,0.032],["SWK","Stanley Black & Decker","Industrial",0.0112,0.3608,-0.7131,0.127],["SWKS","Skyworks Solutions","Tecnología",0.0196,0.4094,-0.7288,0.232],["SYF","Synchrony Financial","Financiero",0.1104,0.3892,-0.6637,2.085],["SYK","Stryker Corporation","Salud",0.1227,0.2644,-0.438,2.476],["SYY","Sysco","Consumo básico",0.0913,0.2972,-0.634,1.56],["T","AT&T","Comunicaciones",0.0575,0.2368,-0.3943,0.825],["TDG","TransDigm Group","Industrial",0.209,0.336,-0.6264,6.713],["TDY","Teledyne Technologies","Tecnología",0.1982,0.2743,-0.4895,6.004],["TECH","Bio-Techne","Salud",0.124,0.3384,-0.6721,2.52],["TEL","TE Connectivity","Tecnología",0.1418,0.2827,-0.4771,3.169],["TER","Teradyne","Tecnología",0.3274,0.4633,-0.5912,20.074],["TFC","Truist Financial","Financiero",0.0634,0.3304,-0.5911,0.937],["TGT","Target Corporation","Consumo básico",0.1036,0.3293,-0.644,1.888],["TJX","TJX Companies","Consumo discrecional",0.1512,0.2582,-0.4255,3.55],["TKO","TKO Group Holdings","Comunicaciones",0.2576,0.3631,-0.6907,10.79],["TMO","Thermo Fisher Scientific","Salud",0.159,0.2634,-0.4095,3.894],["TMUS","T-Mobile US","Comunicaciones",0.1378,0.2698,-0.4399,3.012],["TPL","Texas Pacific Land Corporation","Energía",0.3699,0.4655,-0.6492,28.593],["TPR","Tapestry, Inc.","Consumo discrecional",0.1533,0.4376,-0.7887,3.641],["TRGP","Targa Resources","Energía",0.306,0.4984,-0.9078,16.694],["TRMB","Trimble Inc.","Tecnología",0.0998,0.3358,-0.5735,1.783],["TROW","T. Rowe Price","Financiero",0.0775,0.296,-0.5816,1.234],["TRV","Travelers Companies (The)","Financiero",0.1432,0.2421,-0.4628,3.222],["TSCO","Tractor Supply","Consumo discrecional",0.0842,0.2921,-0.5269,1.388],["TSLA","Tesla, Inc.","Consumo discrecional",0.3521,0.5839,-0.7363,24.695],["TSN","Tyson Foods","Consumo básico",0.026,0.2791,-0.5245,0.319],["TT","Trane Technologies","Industrial",0.2709,0.2736,-0.4053,12.193],["TTWO","Take-Two Interactive","Comunicaciones",0.1856,0.3393,-0.5614,5.246],["TXN","Texas Instruments","Tecnología",0.1981,0.312,-0.3341,5.996],["TXT","Textron","Industrial",0.0569,0.3276,-0.6996,0.814],["TYL","Tyler Technologies","Tecnología",0.0652,0.3003,-0.5744,0.973],["UAL","United Airlines Holdings","Industrial",0.0631,0.5099,-0.794,0.932],["UDR","UDR, Inc.","Inmobiliario",0.0294,0.2519,-0.4444,0.367],["UHS","Universal Health Services","Salud",0.0431,0.3398,-0.563,0.574],["ULTA","Ulta Beauty","Consumo discrecional",0.1121,0.3821,-0.6492,2.137],["UNH","UnitedHealth Group","Salud",0.1348,0.2964,-0.6139,2.898],["UNP","Union Pacific Corporation","Industrial",0.1494,0.2528,-0.3872,3.476],["UPS","United Parcel Service","Industrial",0.0388,0.2722,-0.5792,0.506],["URI","United Rentals","Industrial",0.2901,0.4269,-0.6326,14.508],["USB","U.S. Bancorp","Financiero",0.0681,0.298,-0.5213,1.033],["V","Visa Inc.","Financiero",0.1715,0.2435,-0.3636,4.494],["VEEV","Veeva Systems","Salud",0.2422,0.3856,-0.5569,9.322],["VLO","Valero Energy","Energía",0.2313,0.4027,-0.7188,8.39],["VMC","Vulcan Materials Company","Materiales",0.104,0.302,-0.4923,1.9],["VMRK","Vivmark Residential","Inmobiliario",0.0266,0.2476,-0.459,0.327],["VRSK","Verisk Analytics","Industrial",0.0884,0.2437,-0.5081,1.488],["VRSN","Verisign","Tecnología",0.1288,0.2627,-0.3885,2.684],["VRTX","Vertex Pharmaceuticals","Salud",0.1414,0.3343,-0.4166,3.151],["VTR","Ventas","Inmobiliario",0.0791,0.3422,-0.7692,1.269],["VTRS","Viatris","Salud",-0.0786,0.3692,-0.8418,-0.585],["VZ","Verizon","Comunicaciones",0.0466,0.2058,-0.4121,0.632],["WAB","Wabtec","Industrial",0.1458,0.3121,-0.6408,3.327],["WAT","Waters Corporation","Salud",0.1182,0.3032,-0.4427,2.328],["WDAY","Workday, Inc.","Tecnología",0.0847,0.4045,-0.6338,1.4],["WDC","Western Digital","Tecnología",0.2401,0.5063,-0.7049,9.133],["WEC","WEC Energy Group","Servicios públicos",0.1028,0.213,-0.3231,1.866],["WELL","Welltower","Inmobiliario",0.1587,0.3158,-0.6333,3.88],["WFC","Wells Fargo","Financiero",0.0727,0.3177,-0.6446,1.129],["WM","Waste Management","Industrial",0.1582,0.1937,-0.3007,3.856],["WMB","Williams Companies","Energía",0.1604,0.3783,-0.6808,3.956],["WMT","Walmart","Consumo básico",0.191,0.2201,-0.2574,5.563],["WRB","W. R. Berkley Corporation","Financiero",0.1772,0.2419,-0.4535,4.788],["WSM","Williams-Sonoma, Inc.","Consumo discrecional",0.2477,0.4358,-0.5971,9.826],["WST","West Pharmaceutical Services","Salud",0.1921,0.3396,-0.5929,5.625],["WTW","Willis Towers Watson","Financiero",0.0988,0.2474,-0.3295,1.756],["WY","Weyerhaeuser","Inmobiliario",-0.0027,0.3193,-0.6169,-0.029],["WYNN","Wynn Resorts","Consumo discrecional",0.021,0.4696,-0.774,0.25],["XEL","Xcel Energy","Servicios públicos",0.1032,0.214,-0.3441,1.879],["XOM","ExxonMobil","Energía",0.1219,0.2787,-0.6134,2.448],["XYL","Xylem Inc.","Industrial",0.1159,0.2697,-0.4669,2.254],["XYZ","Block, Inc.","Financiero",0.1874,0.5671,-0.8608,5.352],["YUM","Yum! Brands","Consumo discrecional",0.1208,0.2297,-0.5217,2.411],["ZBH","Zimmer Biomet","Salud",-0.0013,0.2824,-0.5214,-0.014],["ZBRA","Zebra Technologies","Tecnología",0.1779,0.4065,-0.6778,4.823],["ZTS","Zoetis","Salud",0.0527,0.271,-0.7045,0.739]],"sectores":[["Tecnología",68,0.2116,0.3715,-0.5663],["Industrial",70,0.1394,0.2811,-0.4653],["Financiero",74,0.1312,0.3004,-0.512],["Energía",20,0.129,0.4014,-0.79],["Materiales",21,0.1189,0.3084,-0.5509],["Salud",57,0.1182,0.2999,-0.5152],["Consumo discrecional",44,0.117,0.354,-0.5879],["Comunicaciones",18,0.1015,0.2959,-0.5673],["Servicios públicos",29,0.0969,0.2248,-0.4004],["Consumo básico",32,0.0639,0.2431,-0.5191],["Inmobiliario",28,0.0569,0.286,-0.5382]],"plazos":[[1,394,0.8223,0.146,-0.4342,0.5623],[3,370,0.8378,0.1205,-0.4133,1.3187],[5,346,0.8584,0.1147,-0.2919,2.4971],[10,286,0.9161,0.0881,-0.296,3.623],[20,166,1.0,0.088,1.5017,7.5835]],"evolucion":[["2016-01",100.0,100.0],["2016-02",96.3,96.0],["2016-03",98.6,99.8],["2016-04",103.5,106.1],["2016-05",104.0,107.3],["2016-06",105.1,109.4],["2016-07",105.5,109.7],["2016-08",109.0,114.5],["2016-09",109.3,115.7],["2016-10",109.0,115.8],["2016-11",106.6,112.8],["2016-12",110.9,118.7],["2017-01",114.5,122.3],["2017-02",115.7,125.1],["2017-03",121.8,131.9],["2017-04",120.1,130.1],["2017-05",121.8,132.4],["2017-06",124.2,136.3],["2017-07",124.2,136.8],["2017-08",126.8,139.4],["2017-09",127.1,140.1],["2017-10",130.0,144.1],["2017-11",132.7,147.2],["2017-12",136.3,152.3],["2018-01",139.2,155.1],["2018-02",145.9,161.5],["2018-03",138.7,154.5],["2018-04",133.9,152.1],["2018-05",137.8,155.8],["2018-06",142.3,161.2],["2018-07",142.0,161.4],["2018-08",146.7,166.1],["2018-09",151.4,172.3],["2018-10",153.1,172.7],["2018-11",143.5,162.7],["2018-12",146.6,167.0],["2019-01",132.1,150.4],["2019-02",142.6,166.0],["2019-03",148.0,173.9],["2019-04",151.5,177.2],["2019-05",154.7,180.3],["2019-06",145.6,171.7],["2019-07",157.5,185.8],["2019-08",157.1,185.2],["2019-09",154.9,182.1],["2019-10",157.0,185.3],["2019-11",163.9,192.9],["2019-12",166.8,196.1],["2020-01",174.7,204.4],["2020-02",174.3,203.5],["2020-03",166.2,192.9],["2020-04",133.2,147.4],["2020-05",153.0,172.0],["2020-06",165.3,191.3],["2020-07",168.7,192.4],["2020-08",178.7,203.5],["2020-09",191.6,212.9],["2020-10",183.9,207.6],["2020-11",180.2,209.9],["2020-12",199.7,238.0],["2021-01",202.1,241.8],["2021-02",206.1,247.3],["2021-03",213.5,263.4],["2021-04",220.2,276.4],["2021-05",229.9,288.2],["2021-06",230.7,293.2],["2021-07",237.4,296.0],["2021-08",241.3,298.3],["2021-09",249.2,306.6],["2021-10",240.2,298.0],["2021-11",254.5,314.4],["2021-12",249.2,302.1],["2022-01",265.2,326.3],["2022-02",251.5,313.8],["2022-03",238.7,302.7],["2022-04",252.2,320.6],["2022-05",230.8,299.4],["2022-06",228.1,298.7],["2022-07",213.2,277.5],["2022-08",229.8,299.2],["2022-09",221.7,291.7],["2022-10",205.9,273.3],["2022-11",216.0,293.7],["2022-12",228.8,314.6],["2023-01",214.9,298.7],["2023-02",231.8,324.0],["2023-03",222.7,311.4],["2023-04",232.7,313.3],["2023-05",235.3,314.6],["2023-06",238.9,308.7],["2023-07",252.3,331.9],["2023-08",259.5,342.1],["2023-09",256.5,335.7],["2023-10",243.8,315.5],["2023-11",241.1,309.4],["2023-12",261.9,342.1],["2024-01",270.7,359.6],["2024-02",280.2,363.9],["2024-03",293.8,379.2],["2024-04",300.0,391.9],["2024-05",287.5,374.9],["2024-06",303.3,386.5],["2024-07",314.3,386.4],["2024-08",313.0,402.1],["2024-09",318.2,411.9],["2024-10",328.8,425.8],["2024-11",330.2,423.0],["2024-12",349.0,451.1],["2025-01",339.2,423.6],["2025-02",346.8,438.2],["2025-03",338.7,432.7],["2025-04",326.4,422.0],["2025-05",325.0,413.7],["2025-06",344.9,433.1],["2025-07",360.5,454.9],["2025-08",362.8,451.6],["2025-09",373.7,468.8],["2025-10",391.2,478.6],["2025-11",399.9,473.0],["2025-12",398.1,482.7],["2026-01",401.0,493.0],["2026-02",408.2,508.7],["2026-03",402.9,523.7],["2026-04",385.6,496.2],["2026-05",424.1,522.0],["2026-06",446.4,534.2],["2026-07",440.1,547.4],["2026-08",447.1,562.9],["2026-09",449.5,563.0],["2026-10",451.9,542.2],["2026-10",460.6,552.3]]}</script>
+
+<script>
+// ---------- 0. Panel interactivo del proyecto del S&P 500 ----------
+(function () {
+  var fuente = document.getElementById('datos-sp500');
+  if (!fuente) return;
+
+  var D = JSON.parse(fuente.textContent);
+  // Cada empresa es [ticker, nombre, sector, rent. anual, riesgo, peor caída, rent. total]
+  var EMPRESAS = D.empresas;
+
+  // Lo que valdrían 1.000 € puestos en el índice entero
+  var INVERSION = 1000;
+  var MULT_INDICE = D.evolucion[D.evolucion.length - 1][1] / 100;
+  var FINAL_INDICE = INVERSION * MULT_INDICE;
+
+  // --- Utilidades de formato ---
+  function miles(n) {
+    // Puntos cada tres cifras, sin depender de toLocaleString
+    return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  }
+  function euros(v) {
+    return miles(v) + ' €';
+  }
+  function pct(v, dec) {
+    return (v * 100).toFixed(dec === undefined ? 1 : dec).replace('.', ',') + ' %';
+  }
+  function conSigno(v) {
+    return (v >= 0 ? '+' : '−') + pct(Math.abs(v));
+  }
+
+  // ===== Herramienta 1: ¿le ganas al índice? =====
+  var selEmpresa = document.getElementById('j-empresa');
+  var btnAzar = document.getElementById('j-azar');
+  if (selEmpresa && btnAzar) {
+    var elNombre = document.getElementById('j-nombre');
+    var elDinero = document.getElementById('j-dinero');
+    var elBarra = document.getElementById('j-barra');
+    var elBarraInd = document.getElementById('j-barra-ind');
+    var elDetalle = document.getElementById('j-detalle');
+    var elIndice = document.getElementById('j-indice');
+    var elVeredicto = document.getElementById('j-veredicto');
+    var elMarcador = document.getElementById('j-marcador');
+
+    var intentos = 0, aciertos = 0;
+
+    // Relleno el desplegable por orden alfabético
+    EMPRESAS.slice()
+      .sort(function (a, b) { return a[1].localeCompare(b[1], 'es'); })
+      .forEach(function (e) {
+        var o = document.createElement('option');
+        o.value = e[0];
+        o.textContent = e[1];
+        selEmpresa.appendChild(o);
+      });
+
+    elIndice.textContent = euros(FINAL_INDICE);
+
+    function mostrar(e, cuenta) {
+      var final = INVERSION * (1 + e[6]);
+      var gana = final > FINAL_INDICE;
+      var tope = Math.max(final, FINAL_INDICE);
+
+      elNombre.textContent = e[1];
+      elDinero.textContent = euros(final);
+      elDetalle.textContent = e[2] + ' · riesgo ' + pct(e[4]) + ' · peor caída ' + conSigno(e[5]);
+
+      // Las dos barras comparten escala, así se ve la diferencia real
+      elBarra.style.width = (final / tope * 100).toFixed(1) + '%';
+      elBarraInd.style.width = (FINAL_INDICE / tope * 100).toFixed(1) + '%';
+
+      var diferencia = Math.abs(final - FINAL_INDICE);
+      elVeredicto.innerHTML = gana
+        ? 'Enhorabuena: habrías ganado <strong class="bien">' + euros(diferencia) + '</strong> más que comprando el índice.'
+        : 'Te habrías dejado <strong class="mal">' + euros(diferencia) + '</strong> por no comprar el índice entero.';
+
+      if (cuenta) {
+        intentos++;
+        if (gana) aciertos++;
+        elMarcador.textContent = 'Intentos: ' + intentos + ' · le has ganado al índice ' + aciertos
+          + (aciertos === 1 ? ' vez' : ' veces')
+          + '. De las 461 empresas, solo 149 lo consiguen.';
+      }
+    }
+
+    btnAzar.addEventListener('click', function () {
+      var e = EMPRESAS[Math.floor(Math.random() * EMPRESAS.length)];
+      selEmpresa.value = e[0];
+      mostrar(e, true);
+    });
+
+    selEmpresa.addEventListener('change', function () {
+      var e = EMPRESAS.find(function (x) { return x[0] === selEmpresa.value; });
+      if (e) mostrar(e, true);
+    });
+
+    // Arranco con una empresa concreta, para que no se vea vacío
+    var inicial = EMPRESAS.find(function (x) { return x[0] === 'KO'; }) || EMPRESAS[0];
+    selEmpresa.value = inicial[0];
+    mostrar(inicial, false);
+  }
+
+  // ===== Herramienta 2: ¿cuánto tiempo aguantas? =====
+  var slPlazo = document.getElementById('t-plazo');
+  if (slPlazo) {
+    var P = D.plazos;   // [años, periodos, % gana, rent. anual mediana, peor, mejor]
+    slPlazo.max = P.length - 1;
+
+    function pintarPlazo() {
+      var p = P[+slPlazo.value];
+      document.getElementById('t-pct').textContent = (p[2] * 100).toFixed(1).replace('.', ',');
+      document.getElementById('t-anios').textContent = p[0] + (p[0] === 1 ? ' año' : ' años');
+      document.getElementById('t-n').textContent = miles(p[1]);
+      document.getElementById('t-med').textContent = pct(p[3]);
+      document.getElementById('t-peor').textContent = conSigno(p[4]);
+      document.getElementById('t-mejor').textContent = conSigno(p[5]);
+    }
+
+    slPlazo.addEventListener('input', pintarPlazo);
+    pintarPlazo();
+  }
+})();
+
+// ---------- 1. Pestañas de proyecto ----------
+(function () {
+  var lista = document.querySelector('[data-tabs]');
+  if (!lista) return;
+  var pestanas = Array.prototype.slice.call(lista.querySelectorAll('[role="tab"]'));
+  if (pestanas.length < 2) return;
+  lista.hidden = false;
+
+  function mostrar(idBloque) {
+    pestanas.forEach(function (boton) {
+      var activa = boton.getAttribute('aria-controls') === idBloque;
+      boton.setAttribute('aria-selected', activa ? 'true' : 'false');
+      var bloque = document.getElementById(boton.getAttribute('aria-controls'));
+      if (bloque) bloque.hidden = !activa;
+    });
+  }
+  pestanas.forEach(function (boton) {
+    boton.addEventListener('click', function () {
+      var idBloque = boton.getAttribute('aria-controls');
+      mostrar(idBloque);
+      history.replaceState(null, '', '#' + idBloque.replace('panel-', ''));
+    });
+  });
+  window.addEventListener('hashchange', function () {
+    var destino = 'panel-' + location.hash.replace('#', '');
+    if (document.getElementById(destino)) mostrar(destino);
+  });
+  var desdeUrl = 'panel-' + location.hash.replace('#', '');
+  mostrar(document.getElementById(desdeUrl) ? desdeUrl : pestanas[0].getAttribute('aria-controls'));
+})();
+
+// ---------- 2. Visor de imágenes ----------
+(function () {
+  var visor = document.getElementById('visor');
+  var imagen = document.getElementById('visor-img');
+  var doc = document.getElementById('visor-doc');
+  var marco = document.getElementById('visor-frame');
+  var cerrar = document.getElementById('visor-cerrar');
+  if (!visor || !imagen || !cerrar) return;
+
+  var ultimoEnlace = null;   // para devolver el foco al cerrar
+
+  function abrir(enlace) {
+    var destino = enlace.getAttribute('href');
+    var esPdf = /\.pdf$/i.test(destino);
+
+    if (esPdf) {
+      marco.src = destino;
+      doc.hidden = false;
+      imagen.hidden = true;
+    } else {
+      var miniatura = enlace.querySelector('img');
+      imagen.src = destino;
+      imagen.alt = miniatura ? miniatura.alt : '';
+      imagen.hidden = false;
+      doc.hidden = true;
+    }
+
+    visor.hidden = false;
+    document.body.style.overflow = 'hidden';   // bloqueo el scroll de detrás
+    ultimoEnlace = enlace;
+    cerrar.focus();
+  }
+
+  function ocultar() {
+    visor.hidden = true;
+    imagen.src = '';
+    marco.src = 'about:blank';                 // libero el PDF de la memoria
+    document.body.style.overflow = '';
+    if (ultimoEnlace) ultimoEnlace.focus();
+  }
+
+  // Un solo escuchador para todas las imágenes, presentes y futuras
+  document.addEventListener('click', function (evento) {
+    var enlace = evento.target.closest ? evento.target.closest('[data-visor]') : null;
+    if (!enlace) return;
+    evento.preventDefault();
+    abrir(enlace);
+  });
+
+  cerrar.addEventListener('click', ocultar);
+
+  // Pulsar en el fondo cierra; pulsar en la imagen no
+  visor.addEventListener('click', function (evento) {
+    if (evento.target === visor) ocultar();
+  });
+
+  document.addEventListener('keydown', function (evento) {
+    if (evento.key === 'Escape' && !visor.hidden) ocultar();
+  });
+})();
+
+// ---------- 3. Aparición al hacer scroll y barras del panel ----------
+(function () {
+  if (!('IntersectionObserver' in window)) return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  document.documentElement.classList.add('js-anim');
+
+  // Barras y números del panel de la cabecera
+  setTimeout(function () {
+    document.querySelectorAll('.track__fill').forEach(function (barra) {
+      barra.classList.add('grown');
+    });
+    document.querySelectorAll('[data-cuenta]').forEach(function (elemento) {
+      var destino = parseInt(elemento.getAttribute('data-cuenta'), 10);
+      var sufijo = elemento.querySelector('small');
+      var textoSufijo = sufijo ? sufijo.outerHTML : '';
+      if (destino === 0) return;                 // nada que contar
+      var inicio = null;
+      var duracion = 1200;
+      function paso(marca) {
+        if (inicio === null) inicio = marca;
+        var avance = Math.min((marca - inicio) / duracion, 1);
+        // Desacelero al final para que no termine de golpe
+        var suave = 1 - Math.pow(1 - avance, 3);
+        elemento.innerHTML = Math.round(destino * suave) + textoSufijo;
+        if (avance < 1) requestAnimationFrame(paso);
+      }
+      elemento.innerHTML = '0' + textoSufijo;
+      requestAnimationFrame(paso);
+    });
+  }, 220);
+
+  var bloques = document.querySelectorAll('[data-anim]');
+  if (!bloques.length) return;
+  var observador = new IntersectionObserver(function (entradas) {
+    entradas.forEach(function (entrada) {
+      if (entrada.isIntersecting) {
+        entrada.target.classList.add('visible');
+        observador.unobserve(entrada.target);
+      }
+    });
+  }, { rootMargin: '0px 0px -8% 0px' });
+  bloques.forEach(function (bloque) { observador.observe(bloque); });
+})();
+
+// ---------- 4. Línea de consola que se escribe sola ----------
+(function () {
+  var destino = document.querySelector('[data-type]');
+  if (!destino) return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  var palabras = destino.getAttribute('data-palabras').split(',');
+  var indice = 0;      // palabra actual
+  var letras = 0;      // letras escritas de esa palabra
+  var borrando = false;
+
+  function ciclo() {
+    var palabra = palabras[indice];
+    letras = letras + (borrando ? -1 : 1);
+    destino.textContent = palabra.slice(0, letras);
+
+    var espera = borrando ? 45 : 85;
+    if (!borrando && letras === palabra.length) {
+      espera = 1400;                       // pausa con la palabra completa
+      borrando = true;
+    } else if (borrando && letras === 0) {
+      borrando = false;
+      indice = (indice + 1) % palabras.length;
+      espera = 320;
+    }
+    setTimeout(ciclo, espera);
+  }
+
+  destino.textContent = '';
+  setTimeout(ciclo, 600);
+})();
+
+// ---------- 5. Sección activa en la barra fija ----------
+(function () {
+  var enlaces = Array.prototype.slice.call(document.querySelectorAll('.nav a'));
+  if (!enlaces.length) return;
+
+  // Cada enlace con la sección a la que apunta, en el orden de la página
+  var pares = [];
+  enlaces.forEach(function (enlace) {
+    var seccion = document.getElementById(enlace.getAttribute('href').slice(1));
+    if (seccion) pares.push({ enlace: enlace, seccion: seccion });
+  });
+  if (!pares.length) return;
+
+  var pendiente = false;
+
+  function actualizar() {
+    pendiente = false;
+    var limite = window.scrollY + 140;          // justo debajo de la barra
+    var activo = null;
+
+    pares.forEach(function (par) {
+      if (par.seccion.offsetTop <= limite) activo = par.enlace;
+    });
+
+    // Al llegar al final de la página, la última sección manda aunque sea
+    // demasiado corta para cruzar el límite de arriba
+    var fondo = window.innerHeight + Math.ceil(window.scrollY)
+                >= document.documentElement.scrollHeight - 2;
+    if (fondo) activo = pares[pares.length - 1].enlace;
+
+    enlaces.forEach(function (e) { e.removeAttribute('aria-current'); });
+    if (activo) activo.setAttribute('aria-current', 'true');
+  }
+
+  // Agrupo los avisos de scroll en un solo repintado
+  function alHacerScroll() {
+    if (pendiente) return;
+    pendiente = true;
+    requestAnimationFrame(actualizar);
+  }
+
+  window.addEventListener('scroll', alHacerScroll, { passive: true });
+  window.addEventListener('resize', alHacerScroll);
+  actualizar();
+})();
+</script>
+
+</body>
+</html>
